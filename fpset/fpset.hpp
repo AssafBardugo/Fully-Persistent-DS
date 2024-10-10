@@ -49,7 +49,7 @@ namespace pds{
     /**
      * @brief fully persistent set container for sorted UNIQUE objects.
      * 
-     * @tparam OBJ obj type. SHOULD SUPPORT operator<.
+     * @tparam OBJ The object type. SHOULD SUPPORT operator< and copy constructor.
      */
     template <class OBJ>
     class fpset{
@@ -62,43 +62,69 @@ namespace pds{
         fpset();
 
         /**
-         * @brief insert obj to version v.
+         * @brief Insert an object to store in 'version'.
          * 
          * @param obj object to insert.
+         * @attention Since fpset saves the objects sorted, it will save a copy of 'obj', 
+         *  so the move option is more recommended.
          * 
-         * @param v the version to insert to. if v=default_version insert to last version.
+         * @param version The version to insert. 
+         *  if 'version'=default_version insert to last version.
          * 
          * @exception 
          *  - pds::ObjectAlreadyExist()
-         *      if v=default_version and contains('obj', 'curr_version()') != 0 
-         *      or v specify and contains('obj', 'v') != 0 
+         *      if 'version'=default_version and contains('obj', 'curr_version()') != 0 
+         *      or 'version' specify and contains('obj', 'version') != 0 
          * 
          * - pds::VersionOutOfRange()
          *      if version is 0 or version is bigger than what returned with 'curr_version()'
          * 
+         * @return pds::version_t of the new version.
+         * 
+         * @note Time complexity: O(log(size()))
+         */
+        pds::version_t insert(const OBJ& obj, pds::version_t version = default_version);
+
+
+        /**
+         * @brief Insert an rvalue object to store in 'version'.
+         *  Especially recommended for complex OBJ types, since it can significantly 
+         *  improve performance by avoiding deep copies of data.
+         * 
+         * @param obj object to insert.
+         * 
+         * @param version The version to insert. 
+         *  if 'version'=default_version insert to last version.
+         * 
+         * @exception 
+         *  - pds::ObjectAlreadyExist()
+         *      if 'version'=default_version and contains('obj', 'curr_version()') != 0 
+         *      or 'version' specify and contains('obj', 'version') != 0 
+         * 
+         * - pds::VersionOutOfRange()
+         *      if version is 0 or version is bigger than what returned with 'curr_version()'
          * 
          * @return pds::version_t of the new version.
          * 
-         * @note 
-         * Time complexity: O(log(size()))
+         * @note Time complexity: O(log(size()))
          */
-        pds::version_t insert(const OBJ& obj, pds::version_t version = default_version);
         pds::version_t insert(OBJ&& obj, pds::version_t version = default_version);
 
+
         /**
-         * @brief remove obj from the set with version v.
+         * @brief remove obj from the set with 'version'.
          * 
          * @param obj object to remove.
          * 
-         * @param v the version to remove from. if v=default_version remove from last version. 
-         * @attention if contains('obj', 'v') == 0 exception will thrown.
+         * @param v the version to remove from. if 'version'=default_version remove from last_version. 
+         * @attention if contains('obj', 'version') == 0 exception will thrown.
          * 
          * @return pds::version_t of the new version. (option: also the version that 'obj' was removed from).
          * 
          * @note 
          * Time complexity: O(log(size()))
          */
-        pds::version_t remove(OBJ obj, pds::version_t version = default_version);
+        pds::version_t remove(const OBJ& obj, pds::version_t version = default_version);
 
 
         /**
@@ -114,8 +140,11 @@ namespace pds{
          * @note 
          * Time complexity: O(log(size()))
          */
-        bool contains(OBJ obj, pds::version_t version = master_version);
+        bool contains(const OBJ& obj, pds::version_t version = master_version) const;
 
+        pds::version_t size(pds::version_t version = master_version) const;
+
+        pds::version_t curr_version() const;
 
         /**
          * @brief get set of all objects sorted.
@@ -126,27 +155,19 @@ namespace pds{
          * @note 
          * Time complexity: O(size(v))
          */
-        std::set<OBJ> to_set(pds::version_t version = master_version);
+        std::set<OBJ> to_set(pds::version_t version = master_version) const;
 
-        pds::version_t curr_version();
-    };
-
-
-    // Custom comparator that works for both shared_ptr<fat_node<OBJ>> and OBJ
-    template <class OBJ>
-    struct FatNodeAndObjComp{
-        bool operator()(const std::shared_ptr<fat_node<OBJ>>& node_a, 
-                        const std::shared_ptr<fat_node<OBJ>>& node_b) const {
-            return *node_a < *node_b;
-        }
-
-        bool operator()(const std::shared_ptr<fat_node<OBJ>>& node, const OBJ& obj) const {
-            return *node < obj;
-        }
-
-        bool operator()(const OBJ& obj, const std::shared_ptr<fat_node<OBJ>>& node) const {
-            return *node > obj;
-        }
+    private:
+        /**
+         * INTENDED FOR DEBUGGING PURPOSES ONLY
+         * @brief Ensure that 'version' has the all vec's objs
+         * 
+         * @param version version for fpset
+         * @param vec a vector for OBJ elements
+         * @return true if 'version' contain exactly the same objects as vec
+         * @return false otherwise
+         */
+        bool equal(const pds::version_t version, std::vector<OBJ>&& vec) const;
     };
 };
 

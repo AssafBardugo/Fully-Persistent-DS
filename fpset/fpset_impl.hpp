@@ -3,11 +3,22 @@
 
 using namespace pds;
 
+// Custom comparator that works for both shared_ptr<fat_node<OBJ>> and OBJ
+template <class OBJ>
+struct FatNodeAndObjComp{
+    bool operator()(const std::shared_ptr<fat_node<OBJ>>& node_a, 
+                    const std::shared_ptr<fat_node<OBJ>>& node_b) const {
+        return *node_a < *node_b;
+    }
 
-template<class OBJ>
-static bool comp_obj_with_node(const OBJ& obj, const fat_node<OBJ>& node){
-    return obj < node.obj;
-}
+    bool operator()(const std::shared_ptr<fat_node<OBJ>>& node, const OBJ& obj) const {
+        return *node < obj;
+    }
+
+    bool operator()(const OBJ& obj, const std::shared_ptr<fat_node<OBJ>>& node) const {
+        return *node > obj;
+    }
+};
 
 
 template <class OBJ>
@@ -31,27 +42,24 @@ version_t fpset<OBJ>::insert(const OBJ& obj, version_t version){
             "fpset::insert: Attempting to insert an object that already exists for Version " 
             + std::to_string(version)
         );
-    
-    // here: We will not be able to create a new node and not insert it 
-    // since either insertion will end successfully or obj already exists. Thus, it exists in v_master.
 
     version_t new_version = last_version + 1;
-    std::shared_ptr<fat_node<OBJ>> node_ptr = nullptr;
+    std::shared_ptr<fat_node<OBJ>> new_node_ptr = nullptr;
 
     if(auto search = v_master.find(obj); search != v_master.end()){
 
-        node_ptr = *search;
+        new_node_ptr = *search;
     }
     else{
         auto result = v_master.insert(std::make_shared<fat_node<OBJ>>(obj, new_version));
-        node_ptr = *result.first;
+        new_node_ptr = *result.first;
     }
 
     std::shared_ptr<fat_node<OBJ>> tracker = root[version];
 
     if(tracker == nullptr){
 
-        // TODO: insert node_ptr to root[new_version]
+        // TODO: insert new_node_ptr to root[new_version]
 
         return (last_version = new_version);
     }
@@ -64,7 +72,7 @@ version_t fpset<OBJ>::insert(const OBJ& obj, version_t version){
 
             if(tracker->left_ptr(version) == nullptr){
 
-                tracker->insert_left(node_ptr, new_version);
+                tracker->insert_left(new_node_ptr, new_version);
                 break;
             }
 
@@ -74,7 +82,7 @@ version_t fpset<OBJ>::insert(const OBJ& obj, version_t version){
 
             if(tracker->right_ptr(version) == nullptr){
 
-                tracker->insert_right(node_ptr, new_version);
+                tracker->insert_right(new_node_ptr, new_version);
                 break;
             }
 
@@ -87,21 +95,40 @@ version_t fpset<OBJ>::insert(const OBJ& obj, version_t version){
 
 
 template <class OBJ>
-version_t fpset<OBJ>::remove(OBJ obj, version_t version){
+version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
+
+    if(version == default_version)
+        version = last_version;
 
     
 }
 
 
 template <class OBJ>
-bool fpset<OBJ>::contains(OBJ obj, version_t version){
+bool fpset<OBJ>::contains(const OBJ& obj, version_t version) const {
 
     
 }
 
 
 template <class OBJ>
-std::set<OBJ> fpset<OBJ>::to_set(pds::version_t version){
+pds::version_t fpset<OBJ>::size(pds::version_t version = master_version) const {
+
+    if(version == master_version)
+        return v_master.size();
+
+    
+}
+
+
+template <class OBJ>
+pds::version_t fpset<OBJ>::curr_version() const {
+    return last_version;
+}
+
+
+template <class OBJ>
+std::set<OBJ> fpset<OBJ>::to_set(pds::version_t version) const {
 
 
 }

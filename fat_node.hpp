@@ -16,8 +16,23 @@ namespace pds{
         pds::version_t last_mapped;
 
     public:
-        fat_node(const OBJ& obj, const pds::version_t version);
-        fat_node(OBJ&& obj, const pds::version_t version);
+        fat_node(const OBJ& obj, const pds::version_t version) 
+            : obj(obj), first_version(version), 
+
+            // TODO:
+            left(node_table_t()), right(node_table_t()) {
+                
+            last_version = last_mapped = version;
+        }
+
+        fat_node(OBJ&& obj, const pds::version_t version) 
+            : obj(std::move(obj)), first_version(version), 
+
+            // TODO:
+            left(node_table_t()), right(node_table_t()) {
+
+            last_version = last_mapped = version;
+        }
 
         // note: If eventually I will need a D'tor, it has to be supply to the shared_ptr C'tor.
         fat_node(const fat_node&) = delete;
@@ -26,9 +41,10 @@ namespace pds{
         std::shared_ptr<fat_node<OBJ>> left_ptr(const pds::version_t version);
         std::shared_ptr<fat_node<OBJ>> right_ptr(const pds::version_t version);
 
-        fat_node<OBJ>& left_ref(const pds::version_t version);
-        fat_node<OBJ>& right_ref(const pds::version_t version);
+        // fat_node<OBJ>& left_ref(const pds::version_t version);
+        // fat_node<OBJ>& right_ref(const pds::version_t version);
 
+        // TODO: for the new_version: node_ptr->left&right[new_version] should be nullptr
         void insert_left(std::shared_ptr<fat_node<OBJ>>& node_ptr, const pds::version_t new_version);
         void insert_right(std::shared_ptr<fat_node<OBJ>>& node_ptr, const pds::version_t new_version);
 

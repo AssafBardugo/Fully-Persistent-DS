@@ -22,7 +22,6 @@ namespace pds{
         /*
             thrown by:
                 - pds::fat_node C'tor
-                - pds::fat_node::insert_next
         */
     public:
         VersionZero(std::string&& m) : pdsExcept(std::move(m)){}
@@ -31,7 +30,6 @@ namespace pds{
     class VersionAlreadyExist : public pdsExcept {
         /*
             thrown by:
-                - pds::fat_node::insert_next
         */
     public:
         VersionAlreadyExist(std::string&& m) : pdsExcept(std::move(m)){}
@@ -40,7 +38,6 @@ namespace pds{
     class VersionOutOfRange : public pdsExcept {
         /*
             thrown by:
-                - pds::fat_node::insert_next
         */
     public:
         VersionOutOfRange(std::string&& m) : pdsExcept(std::move(m)){}
@@ -49,7 +46,6 @@ namespace pds{
     class VersionHasNullNext : public pdsExcept {
         /*
             thrown by:
-                //- pds::fat_node::next_ref
                 - pds::fpset::insert
         */
     public:
