@@ -5,7 +5,6 @@
  * @brief fully persistent set container.
  * @version 0.1
  * @date 2024-10-09
- * 
  */
 
 /**
@@ -13,14 +12,14 @@
  * 
  * master_version = set<shared_ptr<fat_node>>
  * 
- * root = unorderd_map<version_id, shared_ptr<fat_node>>
+ * root = unorderd_map<pds::version_id, shared_ptr<fat_node>>
  * 
  * fat_node = {obj, 
  *              first_version,
  *              last_version,
  *              last_mapped,
- *              left=unorderd_map<version_id, shared_ptr<fat_node>>, 
- *              right=unorderd_map<version_id, shared_ptr<fat_node>>
+ *              left=unorderd_map<pds::version_id, shared_ptr<fat_node>>, 
+ *              right=unorderd_map<pds::version_id, shared_ptr<fat_node>>
  *             }
  */
 
@@ -30,9 +29,7 @@
 #include <cstddef>
 #include <cstdbool>
 #include <set>
-
-using version_id = std::size_t;
-version_id default_v;
+#include "utils.hpp"
 
 
 /**
@@ -54,12 +51,12 @@ public:
      * @param v the version to insert to. if v=default_v insert to last version.
      * @attention if contains('obj', 'v') != 0 an exception will be thrown.
      * 
-     * @return version_id of the new version.
+     * @return pds::version_id of the new version.
      * 
      * @note 
      * Time complexity: O(log(size()))
      */
-    version_id insert(T obj, version_id v = default_v);
+    pds::version_id insert(T obj, pds::version_id v = default_v);
 
 
     /**
@@ -70,12 +67,12 @@ public:
      * @param v the version to remove from. if v=default_v remove from last version. 
      * @attention if contains('obj', 'v') == 0 exception will thrown.
      * 
-     * @return version_id of the new version. (option: also the version that 'obj' was removed from).
+     * @return pds::version_id of the new version. (option: also the version that 'obj' was removed from).
      * 
      * @note 
      * Time complexity: O(log(size()))
      */
-    version_id remove(T obj, version_id v = default_v);
+    pds::version_id remove(T obj, pds::version_id v = default_v);
 
 
     /**
@@ -91,7 +88,7 @@ public:
      * @note 
      * Time complexity: O(log(size()))
      */
-    bool contains(T obj, version_id v = default_v);
+    bool contains(T obj, pds::version_id v = default_v);
 
 
     /**
@@ -103,7 +100,7 @@ public:
      * @note 
      * Time complexity: O(size(v))
      */
-    std::set<T> get(version_id v = default_v);
+    std::set<T> get(pds::version_id v = default_v);
 };
 
 
