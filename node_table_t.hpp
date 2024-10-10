@@ -15,6 +15,8 @@ namespace pds{
     class node_table_t{
         std::unordered_map<pds::version_range, std::shared_ptr<FN>> table;
 
+    public:
+        std::shared_ptr<FN>& operator[](const pds::version_t key);
     };
 };
 

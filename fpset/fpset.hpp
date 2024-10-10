@@ -47,7 +47,7 @@ namespace pds{
     const pds::version_t master_version = 0;
 
     /**
-     * @brief fully persistent set container for sorted objects.
+     * @brief fully persistent set container for sorted UNIQUE objects.
      * 
      * @tparam OBJ obj type. SHOULD SUPPORT operator<.
      */
@@ -56,6 +56,7 @@ namespace pds{
 
         std::set<std::shared_ptr<pds::fat_node<OBJ>>> v_master;
         pds::node_table_t<pds::fat_node<OBJ>> root;
+        pds::version_t last_version;
 
     public:
         fpset();
@@ -66,15 +67,23 @@ namespace pds{
          * @param obj object to insert.
          * 
          * @param v the version to insert to. if v=default_version insert to last version.
-         * @attention if contains('obj', 'v') != 0 an exception will be thrown.
+         * 
+         * @exception 
+         *  - pds::ObjectAlreadyExist()
+         *      if v=default_version and contains('obj', 'curr_version()') != 0 
+         *      or v specify and contains('obj', 'v') != 0 
+         * 
+         * - pds::VersionOutOfRange()
+         *      if version is 0 or version is bigger than what returned with 'curr_version()'
+         * 
          * 
          * @return pds::version_t of the new version.
          * 
          * @note 
          * Time complexity: O(log(size()))
          */
-        pds::version_t insert(OBJ obj, pds::version_t version = default_version);
-
+        pds::version_t insert(const OBJ& obj, pds::version_t version = default_version);
+        pds::version_t insert(OBJ&& obj, pds::version_t version = default_version);
 
         /**
          * @brief remove obj from the set with version v.
@@ -117,7 +126,27 @@ namespace pds{
          * @note 
          * Time complexity: O(size(v))
          */
-        std::set<OBJ> get(pds::version_t version = master_version);
+        std::set<OBJ> to_set(pds::version_t version = master_version);
+
+        pds::version_t curr_version();
+    };
+
+
+    // Custom comparator that works for both shared_ptr<fat_node<OBJ>> and OBJ
+    template <class OBJ>
+    struct FatNodeAndObjComp{
+        bool operator()(const std::shared_ptr<fat_node<OBJ>>& node_a, 
+                        const std::shared_ptr<fat_node<OBJ>>& node_b) const {
+            return *node_a < *node_b;
+        }
+
+        bool operator()(const std::shared_ptr<fat_node<OBJ>>& node, const OBJ& obj) const {
+            return *node < obj;
+        }
+
+        bool operator()(const OBJ& obj, const std::shared_ptr<fat_node<OBJ>>& node) const {
+            return *node > obj;
+        }
     };
 };
 
