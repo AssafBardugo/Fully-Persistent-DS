@@ -8,7 +8,11 @@ namespace pds{
     struct version_range{
         pds::version_t start;
         pds::version_t end;
-        // TODO: need to provide a hash function and operator==
+        // TODO: need to provide a hash function
+
+        bool operator==(const version_range& other) const {
+            return start == other.start;
+        }
     };
 
     template <class FN>

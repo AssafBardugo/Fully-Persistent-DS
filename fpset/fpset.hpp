@@ -155,19 +155,22 @@ namespace pds{
          * @note 
          * Time complexity: O(size(v))
          */
-        std::set<OBJ> to_set(pds::version_t version = master_version) const;
+        std::set<OBJ> to_set(const pds::version_t version = master_version) const;
 
     private:
+        template <typename T>
+        pds::version_t insert_impl(T&& obj, pds::version_t version);
+
         /**
          * INTENDED FOR DEBUGGING PURPOSES ONLY
-         * @brief Ensure that 'version' has the all vec's objs
+         * @brief Ensure that 'version' has the all set objects
          * 
          * @param version version for fpset
-         * @param vec a vector for OBJ elements
-         * @return true if 'version' contain exactly the same objects as vec
+         * @param obj_set a set of OBJ elements
+         * @return true if 'version' contain exactly the same objects as obj_set
          * @return false otherwise
          */
-        bool equal(const pds::version_t version, std::vector<OBJ>&& vec) const;
+        bool equal(const pds::version_t version, std::set<OBJ>&& obj_set) const;
     };
 };
 
