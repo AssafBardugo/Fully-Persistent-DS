@@ -38,6 +38,8 @@ namespace pds{
     class VersionOutOfRange : public pdsExcept {
         /*
             thrown by:
+                - pds::fpset::insert_impl
+                - pds::fpset::remove
         */
     public:
         VersionOutOfRange(std::string&& m) : pdsExcept(std::move(m)){}
@@ -55,11 +57,22 @@ namespace pds{
     class ObjectAlreadyExist : public pdsExcept{
         /*
             thrown by:
-                - pds::fpset::insert
+                - pds::fpset::insert_impl
         */
     public:
         ObjectAlreadyExist(std::string&& m) : pdsExcept(std::move(m)){}
     };
+
+    class ObjectNotExist : public pdsExcept{
+        /*
+            thrown by:
+                - pds::fpset::remove
+        */
+    public:
+        ObjectNotExist(std::string&& m) : pdsExcept(std::move(m)){}
+    };
+
+    
 };
 
 #endif /* PERSISTENT_DATA_STRUCTURE_EXCEPTIONS_HPP */

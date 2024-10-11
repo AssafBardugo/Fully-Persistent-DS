@@ -54,9 +54,10 @@ namespace pds{
     template <class OBJ>
     class fpset{
 
-        std::set<std::shared_ptr<pds::fat_node<OBJ>>> v_master;
         pds::node_table_t<pds::fat_node<OBJ>> root;
+        std::set<std::shared_ptr<pds::fat_node<OBJ>>> v_master;
         pds::version_t last_version;
+        std::vector<pds::version_t> sizes;
 
     public:
         fpset();
@@ -64,6 +65,7 @@ namespace pds{
 
         /**
          * @brief Insert an object to store in 'version'.
+         *  If the operation succeeds, a new version will be created.
          * 
          * @param obj object to insert.
          * @attention Since fpset saves the objects sorted, it will save a copy of 'obj', 
@@ -89,6 +91,8 @@ namespace pds{
 
         /**
          * @brief Insert an rvalue object to store in 'version'.
+         *  If the operation succeeds, a new version will be created.
+         * 
          *  Especially recommended for complex OBJ types, since it can significantly 
          *  improve performance by avoiding deep copies of data.
          * 
@@ -114,13 +118,19 @@ namespace pds{
 
         /**
          * @brief remove obj from the set with 'version'.
+         *  If the operation succeeds, a new version will be created.
          * 
          * @param obj object to remove.
          * 
-         * @param v the version to remove from. if 'version'=default_version remove from last_version. 
+         * @param version the version to remove from. 
+         *  if 'version'=default_version remove from last_version. 
          * @attention if contains('obj', 'version') == 0 exception will thrown.
          * 
-         * @return pds::version_t of the new version. (option: also the version that 'obj' was removed from).
+         * @exception 
+         * - pds::VersionOutOfRange()
+         *      if version is 0 or version is bigger than what returned with 'curr_version()'
+         * 
+         * @return pds::version_t of the new version. 
          * 
          * @note 
          * Time complexity: O(log(size()))

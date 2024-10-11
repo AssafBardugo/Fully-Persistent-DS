@@ -22,7 +22,8 @@ struct FatNodeAndObjComp{
 
 
 template <class OBJ>
-fpset<OBJ>::fpset() : v_master{FatNodeAndObjComp<OBJ>()}, last_version(1) {
+fpset<OBJ>::fpset() : v_master{FatNodeAndObjComp<OBJ>()}, 
+    sizes{-1, 0}, last_version(1) {
 }
 
 
@@ -58,7 +59,12 @@ version_t fpset<OBJ>::insert_impl(T&& obj, version_t version){
             + std::to_string(version)
         );
 
+
     version_t new_version = last_version + 1;
+
+    // push the size of the new version
+    sizes.push_back(sizes[version] + 1);
+
     std::shared_ptr<fat_node<OBJ>> new_node_ptr = nullptr;
 
     if(auto search = v_master.find(obj); search != v_master.end()){
@@ -84,18 +90,18 @@ version_t fpset<OBJ>::insert_impl(T&& obj, version_t version){
 
             if(tracker->left_ptr(version) == nullptr){
 
-                tracker->insert_left(new_node_ptr, new_version);
+                tracker->insert_left(new_node_ptr, version, new_version);
                 break;
             }
-            tracker = tracker->left_ptr(version);
+            tracker = tracker->left[version];
         }
         else{
             if(tracker->right_ptr(version) == nullptr){
 
-                tracker->insert_right(new_node_ptr, new_version);
+                tracker->insert_right(new_node_ptr, version, new_version);
                 break;
             }
-            tracker = tracker->right_ptr(version);
+            tracker = tracker->right[version];
         }
     }
 
@@ -109,7 +115,53 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
     if(version == default_version)
         version = last_version;
 
-    // TODO:
+    if(version == 0 || version > last_version)
+        throw VersionOutOfRange(
+            "fpset::remove: Version " + std::to_string(version) + " is out of range"
+        );
+
+    if(this->contains(obj, version) == 0)
+        throw ObjectNotExist(
+            "fpset::remove: Attempting to remove an object from Version "
+            + std::to_string(version) + ". But the object is not exists for this Version" 
+        );
+    
+    version_t new_version = last_version + 1;
+
+    // push the size of the new version
+    sizes.push_back(sizes[version] - 1);
+
+    std::shared_ptr<fat_node<OBJ>> tracker = root[version];
+
+    if(tracker->obj == obj){
+
+        // TODO: remove from root[version]
+        return (last_version = new_version);
+    }
+
+    while(true){
+        tracker->map_new_version(new_version);
+
+        if(obj < tracker->obj){
+
+            if(tracker->left[version]->obj == obj){
+
+                tracker->remove_left(version, new_version);
+                break;
+            }
+            tracker = tracker->left[version];
+        }
+        else{
+            if(tracker->right[version]->obj == obj){
+
+                tracker->remove_right(version, new_version);
+                break;
+            }
+            tracker = tracker->right[version];
+        }
+    }
+
+    return (last_version = new_version);
 }
 
 
@@ -126,7 +178,7 @@ version_t fpset<OBJ>::size(version_t version = master_version) const {
     if(version == master_version)
         return v_master.size();
 
-    // TODO:
+    return sizes[version];
 }
 
 

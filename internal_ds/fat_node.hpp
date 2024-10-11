@@ -21,7 +21,7 @@ namespace pds{
 
             // TODO:
             left(node_table_t()), right(node_table_t()) {
-                
+
             last_version = last_mapped = version;
         }
 
@@ -41,12 +41,14 @@ namespace pds{
         std::shared_ptr<fat_node<OBJ>> left_ptr(const pds::version_t version);
         std::shared_ptr<fat_node<OBJ>> right_ptr(const pds::version_t version);
 
-        // fat_node<OBJ>& left_ref(const pds::version_t version);
-        // fat_node<OBJ>& right_ref(const pds::version_t version);
-
         // TODO: for the new_version: node_ptr->left&right[new_version] should be nullptr
-        void insert_left(std::shared_ptr<fat_node<OBJ>>& node_ptr, const pds::version_t new_version);
-        void insert_right(std::shared_ptr<fat_node<OBJ>>& node_ptr, const pds::version_t new_version);
+        void insert_left(std::shared_ptr<fat_node<OBJ>>& node_ptr, 
+            const pds::version_t version, const pds::version_t new_version);
+        void insert_right(std::shared_ptr<fat_node<OBJ>>& node_ptr, 
+            const pds::version_t version, const pds::version_t new_version);
+
+        void remove_left(const pds::version_t version, const pds::version_t new_version);
+        void remove_right(const pds::version_t version, const pds::version_t new_version);
 
         void map_new_version(const pds::version_t new_version);
 
