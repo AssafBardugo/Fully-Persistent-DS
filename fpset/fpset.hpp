@@ -12,13 +12,12 @@
 
 #include "fat_node.hpp"
 
-
 namespace pds{
 
     /**
      * @brief default_version uses to be 'last_version' in insert & remove.
      */
-    const pds::version_t default_version = std::numeric_limits<std::size_t>::max();
+    const pds::version_t default_version = std::numeric_limits<pds::version_t>::max();
 
     /**
      * @anchor MasterVersion
@@ -46,6 +45,7 @@ namespace pds{
      */
     const pds::version_t master_version = 0;
 
+
     /**
      * @brief fully persistent set container for sorted UNIQUE objects.
      * 
@@ -60,6 +60,7 @@ namespace pds{
 
     public:
         fpset();
+
 
         /**
          * @brief Insert an object to store in 'version'.
@@ -142,9 +143,12 @@ namespace pds{
          */
         bool contains(const OBJ& obj, pds::version_t version = master_version) const;
 
+
         pds::version_t size(pds::version_t version = master_version) const;
 
+
         pds::version_t curr_version() const;
+
 
         /**
          * @brief get set of all objects sorted.
@@ -160,6 +164,7 @@ namespace pds{
     private:
         template <typename T>
         pds::version_t insert_impl(T&& obj, pds::version_t version);
+
 
         /**
          * INTENDED FOR DEBUGGING PURPOSES ONLY

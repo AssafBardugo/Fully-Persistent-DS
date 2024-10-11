@@ -109,14 +109,14 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
     if(version == default_version)
         version = last_version;
 
-    
+    // TODO:
 }
 
 
 template <class OBJ>
 bool fpset<OBJ>::contains(const OBJ& obj, version_t version) const {
 
-    
+    // TODO:
 }
 
 
@@ -126,7 +126,7 @@ version_t fpset<OBJ>::size(version_t version = master_version) const {
     if(version == master_version)
         return v_master.size();
 
-    
+    // TODO:
 }
 
 
