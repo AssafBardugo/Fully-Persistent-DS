@@ -54,14 +54,13 @@ namespace pds{
     template <class OBJ>
     class fpset{
 
-        pds::node_table_t<pds::fat_node<OBJ>> root;
+        pds::node_table<pds::fat_node<OBJ>> root;
         std::set<std::shared_ptr<pds::fat_node<OBJ>>> v_master;
         pds::version_t last_version;
         std::vector<pds::version_t> sizes;
 
     public:
         fpset();
-
 
         /**
          * @brief Insert an object to store in 'version'.
@@ -77,7 +76,7 @@ namespace pds{
          * @exception 
          *  - pds::ObjectAlreadyExist()
          *      if 'version'=default_version and contains('obj', 'curr_version()') != 0 
-         *      or 'version' specify and contains('obj', 'version') != 0 
+         *      or 'version' specify and contains('obj', 'version') == true 
          * 
          * - pds::VersionOutOfRange()
          *      if version is 0 or version is bigger than what returned with 'curr_version()'
@@ -104,7 +103,7 @@ namespace pds{
          * @exception 
          *  - pds::ObjectAlreadyExist()
          *      if 'version'=default_version and contains('obj', 'curr_version()') != 0 
-         *      or 'version' specify and contains('obj', 'version') != 0 
+         *      or 'version' specify and contains('obj', 'version') == true 
          * 
          * - pds::VersionOutOfRange()
          *      if version is 0 or version is bigger than what returned with 'curr_version()'
@@ -124,7 +123,7 @@ namespace pds{
          * 
          * @param version the version to remove from. 
          *  if 'version'=default_version remove from last_version. 
-         * @attention if contains('obj', 'version') == 0 exception will thrown.
+         * @attention if contains('obj', 'version') == false: exception will thrown.
          * 
          * @exception 
          * - pds::VersionOutOfRange()
@@ -144,9 +143,7 @@ namespace pds{
          * @param obj the object to query for.
          * @param v if v=master_version search in all versions. else, search for version v.
          *  
-         * @return 
-         * if v not given: the first version that contains 'obj'. 0 if 'obj' has never insert.
-         * if v specify: v if 'obj' contains. 0 else.
+         * @return true if 'obj' exists in 'version', false otherwise.
          * 
          * @note 
          * Time complexity: O(log(size()))

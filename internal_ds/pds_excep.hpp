@@ -40,6 +40,8 @@ namespace pds{
             thrown by:
                 - pds::fpset::insert_impl
                 - pds::fpset::remove
+                - pds::fpset::contains
+                - pds::node_table::at
         */
     public:
         VersionOutOfRange(std::string&& m) : pdsExcept(std::move(m)){}
@@ -71,7 +73,6 @@ namespace pds{
     public:
         ObjectNotExist(std::string&& m) : pdsExcept(std::move(m)){}
     };
-
     
 };
 

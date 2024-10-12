@@ -1,5 +1,7 @@
 #include "fpset.hpp"
 
+using namespace pds;
+
 int main(){
 
     fpset<int> set; // v=0
