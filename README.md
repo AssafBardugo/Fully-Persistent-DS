@@ -1,9 +1,9 @@
 
 # Fully Persistent Data Structures Library in C++
 
-## Overview
 
-This project is a C++ template library implementing [Fully Persistent Data Structures](https://en.wikipedia.org/wiki/Persistent_data_structure) using the **Fat Node** method. 
+This project is a C++ template library implementing [Fully Persistent Data Structures](https://en.wikipedia.org/wiki/Persistent_data_structure) using the **Fat Node** method.
+
 It enables efficient storage and retrieval of all previous versions of a data structure. 
 The project is highly modular, using templates to support arbitrary data types and designed for real-world applications where persistent version tracking is essential.
 
@@ -35,7 +35,7 @@ int main() {
     pds::fpset<std::string> my_fpset; // Create a new fpset with first version
     // Version 1: {}
 
-    my_fpset.insert("a"); // Create Version 2 by insert "a"
+    assert(my_fpset.insert("a") == 2); // Create Version 2 by insert "a"
     // Version 1: {}
     // Version 2: {"a"}
 
@@ -44,13 +44,13 @@ int main() {
     // Version 2: {"a"}
     // Version 3: {"a", "b"}
 
-    my_fpset.insert("c", 2); // Insert "c" to version 2
+    assert(my_fpset.insert("c", 2) == 4); // Insert "c" to version 2
     // Version 1: {}
     // Version 2: {"a"}
     // Version 3: {"a", "b"}
     // Version 4: {"a", "c"}
 
-    my_fpset.remove("c"); // Remove "c" from last version
+    assert(my_fpset.remove("c") == 5); // Remove "c" from last version
     // Version 1: {}
     // Version 2: {"a"}
     // Version 3: {"a", "b"}
@@ -59,7 +59,7 @@ int main() {
 
     assert(my_fpset.contains("c", 4) == true); // Version 4 stil contain "a"
 
-    my_fpset.remove("b", 3); // Create a new version from version 3 without "b"
+    assert(my_fpset.remove("b", 3) == 6); // Create a new version from version 3 without "b"
     // Version 1: {}
     // Version 2: {"a"}
     // Version 3: {"a", "b"}
