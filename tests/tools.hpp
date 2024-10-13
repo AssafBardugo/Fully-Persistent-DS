@@ -5,10 +5,10 @@
 
 namespace pds{
 
-    struct test_node_table{
-        pds::node_table<pds::test_node_table> left;
-        pds::node_table<pds::test_node_table> right;
-        test_node_table(const pds::version_t v) 
+    struct node_table_test_t{
+        pds::node_table<pds::node_table_test_t> left;
+        pds::node_table<pds::node_table_test_t> right;
+        node_table_test_t(const pds::version_t v) 
             : left(v), right(v) {}
     };
 

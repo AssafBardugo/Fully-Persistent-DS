@@ -5,28 +5,23 @@ using namespace pds;
 /*** test class node_table ***/
 void test_node_table_basic();
 void test_node_table_map();
+void test_node_table();
 
 int main(){
 
-    test_node_table_basic();
-    std::cout << "\ntest_node_table_basic PASS\n";
+    test_node_table();
 
-    test_node_table_map();
-    std::cout << "test_node_table_map PASS\n";
-
-
-    std::cout << "\nALL fat_node TESTS PASSED!!\n";
     return 0;
 }
 
 
 void test_node_table_basic(){
 
-    node_table<test_node_table> n_table(1);  // n_table.table = {1: nullptr}
+    node_table<node_table_test_t> n_table(1);  // n_table.table = {1: nullptr}
     assert(n_table.at(1) == nullptr);
 
     /* create sp1 */
-    std::shared_ptr<test_node_table> sp1 = std::make_shared<test_node_table>(1);
+    std::shared_ptr<node_table_test_t> sp1 = std::make_shared<node_table_test_t>(1);
     assert(sp1.use_count() == 1);
     assert(sp1->left.at(1) == nullptr);
     assert(sp1->right.at(1) == nullptr);
@@ -42,11 +37,11 @@ void test_node_table_basic(){
 
 void test_node_table_map(){
 
-    node_table<test_node_table> n_table(1);  // n_table.table = {1: nullptr}
+    node_table<node_table_test_t> n_table(1);  // n_table.table = {1: nullptr}
     assert(n_table.at(1) == nullptr);
 
     /* create sp1 */
-    std::shared_ptr<test_node_table> sp1 = std::make_shared<test_node_table>(1);
+    std::shared_ptr<node_table_test_t> sp1 = std::make_shared<node_table_test_t>(1);
     assert(sp1.use_count() == 1);
     assert(sp1->left.at(1) == nullptr);
     assert(sp1->right.at(1) == nullptr);
@@ -68,7 +63,7 @@ void test_node_table_map(){
     assert(sp1.use_count() == 3);
 
     /* create sp2 */
-    std::shared_ptr<test_node_table> sp2 = std::make_shared<test_node_table>(2);
+    std::shared_ptr<node_table_test_t> sp2 = std::make_shared<node_table_test_t>(2);
     assert(sp2.use_count() == 1);
     assert(sp2->left.at(2) == nullptr);
     assert(sp2->right.at(2) == nullptr);
@@ -101,4 +96,15 @@ void test_node_table_map(){
     assert(n_table.at(1) == nullptr); // n_table.table = {1: nullptr, 2: nullptr, 3: nullptr}
     assert(sp2.use_count() == 1);
     assert(sp1.use_count() == 1);
+}
+
+void test_node_table(){
+
+    test_node_table_basic();
+    std::cout << "\ntest_node_table_basic PASS\n";
+
+    test_node_table_map();
+    std::cout << "test_node_table_map PASS\n";
+
+    std::cout << "\nALL fat_node TESTS PASSED!!\n";
 }
