@@ -1,5 +1,5 @@
 
-# Fully Persistent Data Structures Library in C++
+# Fully Persistent Data Structures in C++
 
 
 This project is a C++ template library implementing [Fully Persistent Data Structures](https://en.wikipedia.org/wiki/Persistent_data_structure) using the **Fat Node** method.
@@ -29,9 +29,12 @@ Here is a basic example of creating and working with a fully persistent set:
 
 ```cpp
 #include <cassert>
+#include <string>
+
 #include "fpset.h"
 
 int main() {
+
     pds::fpset<std::string> my_fpset; // Create a new fpset with first version
     // Version 1: {}
 
@@ -74,7 +77,7 @@ int main() {
 
     // fpset can return a set of specific version
     assert(my_fpset.to_set(4) == std::set<std::string>({"a", "c"})); 
-    assert(my_fpset.to_set() == std::set<std::string>({"a", "b", "c"})); 
+    assert(my_fpset.to_set() == std::set<std::string>({"a", "b", "c"})); // All elements
 
     return 0;
 }
