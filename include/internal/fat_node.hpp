@@ -6,8 +6,8 @@
 namespace pds{
 
     struct map_cow{
-        pds::version_t dst;
-        pds::version_t src;
+        pds::version_t new_version;
+        pds::version_t old_version;
     };
     
     template <class FN>
@@ -16,7 +16,7 @@ namespace pds{
         std::vector<pds::map_cow> cow_stack;
 
     public:
-        explicit node_table(const pds::version_t create_version);
+        node_table(const pds::version_t create_version);
 
         // performing an insertion if such key does not already exist.
         std::shared_ptr<FN>& operator[](const pds::version_t key);

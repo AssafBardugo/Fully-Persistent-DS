@@ -53,8 +53,8 @@ template <class FN>
 std::shared_ptr<FN>& node_table<FN>::at(const version_t key){
 
     try{
-        for(map_cow& pair : cow_stack)
-            table[pair.dst] = table[pair.src];
+        for(map_cow& new_map : cow_stack)
+            table[new_map.new_version] = table[new_map.old_version];
 
         if(table.at(key) != nullptr){
 
@@ -65,10 +65,10 @@ std::shared_ptr<FN>& node_table<FN>::at(const version_t key){
         cow_stack.clear();
         return table.at(key);
     }
-    catch(const std::out_of_range&){
+    catch(const std::out_of_range& e){
 
         throw VersionOutOfRange(
-            "node_table::at: Version " + std::to_string(key) + " is out of range"
+            "node_table::at: std::out_of_range::what(): " + std::string(e.what())
         );
     }
 }
