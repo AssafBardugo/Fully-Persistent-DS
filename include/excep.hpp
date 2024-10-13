@@ -41,7 +41,7 @@ namespace pds{
                 - pds::fpset::insert_impl
                 - pds::fpset::remove
                 - pds::fpset::contains
-                - pds::node_table::at
+                - pds::nodes_table::at
         */
     public:
         VersionOutOfRange(std::string&& m) : pdsExcept(std::move(m)){}

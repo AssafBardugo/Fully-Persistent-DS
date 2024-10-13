@@ -1,5 +1,5 @@
-#ifndef FAT_NODE_IMPLEMENTATION_HPP
-#define FAT_NODE_IMPLEMENTATION_HPP
+#ifndef PERSISTENT_DATA_STRUCTURE_FAT_NODE_IMPLEMENTATION_HPP
+#define PERSISTENT_DATA_STRUCTURE_FAT_NODE_IMPLEMENTATION_HPP
 
 #include "fat_node.hpp"
 #include "excep.hpp"
@@ -9,14 +9,14 @@ using namespace pds;
 template <class OBJ>
 fat_node<OBJ>::fat_node(const OBJ& obj, const version_t new_version) 
 
-    : obj(obj), left(node_table(new_version)), right(node_table(new_version)) {
+    : obj(obj), left(nodes_table(new_version)), right(nodes_table(new_version)) {
 
 }
 
 template <class OBJ>
 fat_node<OBJ>::fat_node(OBJ&& obj, const version_t new_version) 
 
-    : obj(std::move(obj)), left(node_table(new_version)), right(node_table(new_version)) {
+    : obj(std::move(obj)), left(nodes_table(new_version)), right(nodes_table(new_version)) {
 
 }
 
@@ -38,19 +38,19 @@ bool fat_node<OBJ>::operator>(const OBJ& other_obj) const {
 
 /*** Implementation of helper classes ***/
 template <class FN>
-node_table<FN>::node_table(const version_t create_version) 
+nodes_table<FN>::nodes_table(const version_t create_version) 
 
     : table{{create_version, nullptr}} {
 }
 
 template <class FN>
-std::shared_ptr<FN>& node_table<FN>::operator[](const version_t key){
+std::shared_ptr<FN>& nodes_table<FN>::operator[](const version_t key){
 
     return table[key];
 }
 
 template <class FN>
-std::shared_ptr<FN>& node_table<FN>::at(const version_t key){
+std::shared_ptr<FN>& nodes_table<FN>::at(const version_t key){
 
     try{
         for(map_cow& new_map : cow_stack)
@@ -68,16 +68,16 @@ std::shared_ptr<FN>& node_table<FN>::at(const version_t key){
     catch(const std::out_of_range& e){
 
         throw VersionOutOfRange(
-            "node_table::at: std::out_of_range::what(): " + std::string(e.what())
+            "nodes_table::at: std::out_of_range::what(): " + std::string(e.what())
         );
     }
 }
 
 template <class FN>
-void node_table<FN>::map(const std::vector<pds::map_cow>& to_push){
+void nodes_table<FN>::map(const std::vector<pds::map_cow>& to_push){
 
     cow_stack.insert(cow_stack.end(), to_push.begin(), to_push.end());
 }
 
 
-#endif /* FAT_NODE_IMPLEMENTATION_HPP */
+#endif /* PERSISTENT_DATA_STRUCTURE_FAT_NODE_IMPLEMENTATION_HPP */

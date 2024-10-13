@@ -54,7 +54,7 @@ namespace pds{
     template <class OBJ>
     class fpset{
 
-        pds::node_table<pds::fat_node<OBJ>> root;
+        pds::nodes_table<pds::fat_node<OBJ>> root;
         std::set<std::shared_ptr<pds::fat_node<OBJ>>> v_master;
         pds::version_t last_version;
         std::vector<pds::version_t> sizes;

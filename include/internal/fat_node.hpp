@@ -1,7 +1,7 @@
-#ifndef FAT_NODE_HPP
-#define FAT_NODE_HPP
+#ifndef PERSISTENT_DATA_STRUCTURE_FAT_NODE_HPP
+#define PERSISTENT_DATA_STRUCTURE_FAT_NODE_HPP
 
-#include "utils.hpp"
+#include "nodes_table.hpp"
 
 namespace pds{
 
@@ -11,12 +11,12 @@ namespace pds{
     };
     
     template <class FN>
-    class node_table{
+    class nodes_table{
         std::unordered_map<pds::version_t, std::shared_ptr<FN>> table;
         std::vector<pds::map_cow> cow_stack;
 
     public:
-        node_table(const pds::version_t create_version);
+        nodes_table(const pds::version_t create_version);
 
         // performing an insertion if such key does not already exist.
         std::shared_ptr<FN>& operator[](const pds::version_t key);
@@ -32,8 +32,8 @@ namespace pds{
         const OBJ obj;
 
     public:
-        pds::node_table<fat_node<OBJ>> left;
-        pds::node_table<fat_node<OBJ>> right;
+        pds::nodes_table<fat_node<OBJ>> left;
+        pds::nodes_table<fat_node<OBJ>> right;
 
         fat_node(const OBJ& obj, const pds::version_t new_version);
         fat_node(OBJ&& obj, const pds::version_t new_version);
@@ -47,4 +47,4 @@ namespace pds{
     };
 };
 
-#endif /* FAT_NODE_HPP */
+#endif /* PERSISTENT_DATA_STRUCTURE_FAT_NODE_HPP */
