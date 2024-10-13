@@ -1,5 +1,5 @@
-#ifndef UTILITYS_HPP
-#define UTILITYS_HPP
+#ifndef PERSISTENT_DATA_STRUCTURE_UTILITYS_HPP
+#define PERSISTENT_DATA_STRUCTURE_UTILITYS_HPP
 
 #include <cassert>
 #include <cstdbool>
@@ -51,4 +51,4 @@ namespace pds{
     /********************************************************/
 };
 
-#endif /* UTILITYS_HPP */
+#endif /* PERSISTENT_DATA_STRUCTURE_UTILITYS_HPP */

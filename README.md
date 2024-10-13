@@ -31,7 +31,7 @@ Here is a basic example of creating and working with a fully persistent set:
 #include <cassert>
 #include <string>
 
-#include "fpset.h"
+#include "fpset.hpp"
 
 int main() {
 
@@ -126,7 +126,7 @@ Ensure that the `tests/` directory contains all relevant unit tests for your dat
 
 ```
 .
-├── include
+├── include/
 │   ├── internal/       
 │   │   ├── fat_node.hpp        # Fat Node header for version tracking
 │   │   └── fat_node_impl.hpp   # Fat Node implementation for version tracking
