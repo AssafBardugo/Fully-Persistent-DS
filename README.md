@@ -86,7 +86,7 @@ int main() {
 ## Usage
 
 To integrate the library into your project:
-1. Download the files ans merge the [include](https://github.com/AssafBardugo/Fully-Persistent-DS/include) folder with your include folder.
+1. Download the files ans merge the [include](https://github.com/AssafBardugo/Fully-Persistent-DS/tree/main/include) folder with your include folder.
 2. Include the data structure you to want to use:
 
 ```cpp
