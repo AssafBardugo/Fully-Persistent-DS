@@ -3,89 +3,100 @@
 
 ## Overview
 
-This project is a C++ template library implementing Fully Persistent Data Structures (FPDS) using the **Fat Node** method. It enables efficient storage and retrieval of all previous versions of a data structure. This allows for operations such as **undo/redo**, **version control**, and **time-travel queries** for databases. The project is highly modular, using templates to support arbitrary data types and designed for real-world applications where persistent version tracking is essential.
+This project is a C++ template library implementing [Fully Persistent Data Structures](https://en.wikipedia.org/wiki/Persistent_data_structure) using the **Fat Node** method. 
+It enables efficient storage and retrieval of all previous versions of a data structure. 
+The project is highly modular, using templates to support arbitrary data types and designed for real-world applications where persistent version tracking is essential.
 
 ### Key Features:
 - **Fat Node Structure**: Efficiently tracks all versions of a data structure while minimizing memory overhead.
-- **Persistent Operations**: Non-destructive updates (insert, delete, modify) that preserve all prior versions.
 - **Fully Persistent**: Allows modifications and access to both old and current versions.
-- **Applications**: Version control, editing systems (undo/redo), and time-travel queries in databases.
-- **Extensible Design**: Ready for extension to other persistent data structures beyond the set.
 
 ## Features
 
-- **Generic Template Classes**: Supports arbitrary types via templates.
 - **Efficient Version Control**: Easily access and work with different versions of a data structure.
 - **Fast Querying**: Implements version management using a Binary Search Tree (BST) for efficient access.
-- **Optimized Memory Usage**: Tracks only the changes between versions, reducing the memory footprint.
+- **Optimized Memory Usage**: Keeps only one copy of each object, regardless of the number of versions to which it has been added.
 - **Copy and Move Semantics**: Supports both copy and move operations to ensure efficient resource handling in various scenarios.
 
-## Supported Data Structures
+### Supported Data Structures
 
 - **Fully Persistent Set** (`fpset<T>`)  
-Additional data structures like stacks and queues may be added in future versions.
-
-## Installation
-
-### Prerequisites
-
-- **GCC**: Ensure you have GCC installed (version 9.0 or later recommended).
-- **MSYS2** (for Windows users): Install MSYS2 to provide the required build environment.
-
-### Steps
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/persistent-structures-c.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
-   cd persistent-structures-c
-   ```
-
-3. Build the project using `make`:
-   ```bash
-   make
-   ```
-
-## Usage
-
-To integrate the library into your project, include the header files in your source code:
-
-```cpp
-#include "fpset.h"
-#include "fat_node.h"
-```
+Additional data structures like **list** and **string** are currently under development.
 
 ### Example
 
-Here is an example of creating and working with a fully persistent set:
+Here is a basic example of creating and working with a fully persistent set:
 
 ```cpp
+#include <cassert>
 #include "fpset.h"
-#include <iostream>
 
 int main() {
-    pds::fpset<int> set;
+    pds::fpset<std::string> my_fpset; // Create a new fpset with first version
+    // Version 1: {}
 
-    set.insert(1); // Insert element 1
-    set.insert(2); // Insert element 2
+    my_fpset.insert("a"); // Create Version 2 by insert "a"
+    // Version 1: {}
+    // Version 2: {"a"}
 
-    auto version1 = set.get_version(); // Save the first version
-    set.insert(3); // Insert element 3 in the current version
+    assert(my_fpset.insert("b") == 3); // Create Version 3 by insert "b" to last version
+    // Version 1: {}
+    // Version 2: {"a"}
+    // Version 3: {"a", "b"}
 
-    auto version2 = set.get_version(); // Save the second version
+    my_fpset.insert("c", 2); // Insert "c" to version 2
+    // Version 1: {}
+    // Version 2: {"a"}
+    // Version 3: {"a", "b"}
+    // Version 4: {"a", "c"}
 
-    // Access the different versions
-    std::cout << "Version 1 contains 1: " << version1.contains(1) << "
-"; // Outputs: true
-    std::cout << "Version 2 contains 3: " << version2.contains(3) << "
-"; // Outputs: true
+    my_fpset.remove("c"); // Remove "c" from last version
+    // Version 1: {}
+    // Version 2: {"a"}
+    // Version 3: {"a", "b"}
+    // Version 4: {"a", "c"}
+    // Version 5: {"a"}
+
+    assert(my_fpset.contains("c", 4) == true); // Version 4 stil contain "a"
+
+    my_fpset.remove("b", 3); // Create a new version from version 3 without "b"
+    // Version 1: {}
+    // Version 2: {"a"}
+    // Version 3: {"a", "b"}
+    // Version 4: {"a", "c"}
+    // Version 5: {"a"}
+    // Version 6: {"a"}
+
+    assert(my_fpset.contains("b") == true); // "b" exist in some version
+    
+    assert(my_fpset.size(1) == 0); // Version 1 has no elements
+    assert(my_fpset.size() == 3); // The size of all elements is 3: {"a", "b", "c"}
+
+    // fpset can return a set of specific version
+    assert(my_fpset.to_set(4) == std::set<std::string>({"a", "c"})); 
+    assert(my_fpset.to_set() == std::set<std::string>({"a", "b", "c"})); 
 
     return 0;
 }
 ```
+
+## Usage
+
+To integrate the library into your project:
+1. Download the files ans merge the [include](https://github.com/AssafBardugo/Fully-Persistent-DS/include) folder with your include folder.
+2. Include the data structure you to want to use:
+
+```cpp
+#include "fpset.hpp"
+
+pds::fpset my_set;
+```
+
+#### Prerequisites
+
+- **C++20**: Ensure you have C++20 installed.
+
+
 
 ## Documentation
 
@@ -99,7 +110,7 @@ This will generate the documentation in the `docs/` directory.
 
 ## Testing
 
-Unit tests are provided using the **Unity** testing framework. To build and run the tests:
+To build and run the tests:
 
 ```bash
 make test
@@ -112,13 +123,23 @@ Ensure that the `tests/` directory contains all relevant unit tests for your dat
 
 ```
 .
-├── include/
-│   ├── fat_node.h       # Fat Node implementation for tracking versions
-│   ├── fpset.h          # Fully Persistent Set template class
-├── src/
-│   └── main.cpp         # Example usage of the library
+├── include/FPStructs
+│   ├── internal/       
+│   │   ├── fat_node.hpp        # Example usage of the library
+│   │   └── fat_node_impl.hpp   # Example usage of the library
+│   ├── in_develop/
+│   │   ├── fplist/
+│   │   │   ├── fplist.hpp           # Fat Node implementation for tracking versions
+│   │   │   └── fplist_impl.hpp      # Fully Persistent Set template class
+│   │   └── fpstring.hpp        # Example usage of the library
+│   ├── fpset.hpp           # Fat Node implementation for tracking versions
+│   ├── fpset_impl.hpp      # Fully Persistent Set template class
+│   ├── pds_excep.hpp       # Fully Persistent Set template class
+│   └── utils.hpp           # Fully Persistent Set template class
 ├── tests/
-│   └── test_fpset.cpp   # Unit tests for the fpset class
+│   ├── test_fpset.cpp      # Unit tests for the fpset class
+│   ├── test_fplist.cpp     # Unit tests for the fpset class
+│   └── test_fat_node.cpp   # Unit tests for the fpset class
 ├── Makefile             # Makefile for building the project
 ├── README.md            # Project documentation
 └── Doxyfile             # Doxygen configuration file for generating docs
@@ -126,7 +147,7 @@ Ensure that the `tests/` directory contains all relevant unit tests for your dat
 
 ## Future Work
 
-- Implement additional fully persistent data structures such as **queues**, **stacks**, and **maps**.
+- Implement additional fully persistent data structures such as **list**, **string**, and **priority_queue**.
 - Explore optimizations for minimizing memory overhead even further.
 - Add support for persistent algorithms, allowing operations over different versions of data structures.
 
