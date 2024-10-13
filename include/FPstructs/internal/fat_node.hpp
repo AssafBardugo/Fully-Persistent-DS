@@ -8,6 +8,8 @@ namespace pds{
     template <class FN>
     class node_table{
         std::unordered_map<pds::version_t, std::shared_ptr<FN>> table;
+
+        // TODO: replace the pair with a struct
         std::vector<std::pair<pds::version_t, pds::version_t>> cow_stack;
         pds::version_t last_version;
         pds::version_t last_mapped;

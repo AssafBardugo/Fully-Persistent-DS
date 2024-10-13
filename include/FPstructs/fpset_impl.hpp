@@ -142,7 +142,7 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
     std::shared_ptr<fat_node<OBJ>> tracker = root.at(version);
 
     if(tracker->obj == obj){
-
+        // TODO: new_version has to keep version childrens
         root[new_version] = nullptr;
         return (last_version = new_version);
     }
@@ -152,7 +152,8 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
         if(obj < tracker->obj){
 
             if(tracker->left[version]->obj == obj){
-
+                
+                // TODO: new_version has to keep version childrens
                 tracker->left[new_version] = nullptr;
                 break;
             }

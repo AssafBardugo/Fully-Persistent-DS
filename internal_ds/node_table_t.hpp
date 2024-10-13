@@ -1,7 +1,0 @@
-#ifndef NEXT_TABLE_TYPE_HPP
-#define NEXT_TABLE_TYPE_HPP
-
-
-
-
-#endif /* NEXT_TABLE_TYPE_HPP */
