@@ -2,7 +2,7 @@
 #define FULLY_PERSISTENT_SET_IMPLEMENTATION_HPP
 
 #include "fpset.hpp"
-#include "pds_excep.hpp"
+#include "excep.hpp"
 
 using namespace pds;
 

@@ -10,7 +10,7 @@
 #ifndef FULLY_PERSISTENT_SET_HPP
 #define FULLY_PERSISTENT_SET_HPP
 
-#include "fat_node.hpp"
+#include "internal/fat_node.hpp"
 
 namespace pds{
 
