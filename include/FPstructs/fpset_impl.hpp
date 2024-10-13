@@ -88,7 +88,8 @@ version_t fpset<OBJ>::insert_impl(T&& obj, version_t version){
         return (last_version = new_version);
     }
 
-    root.map({std::make_pair(new_version, version)});
+    pds::map_cow new_map = {new_version, version};
+    root.map({new_map});
 
     std::shared_ptr<fat_node<OBJ>>& tracker = root.at(version);
 

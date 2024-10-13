@@ -53,8 +53,8 @@ template <class FN>
 std::shared_ptr<FN>& node_table<FN>::at(const version_t key){
 
     try{
-        for(auto& v_map : cow_stack)
-            table[v_map.first] = table[v_map.second];
+        for(map_cow& pair : cow_stack)
+            table[pair.dst] = table[pair.src];
 
         if(table.at(key) != nullptr){
 
@@ -74,7 +74,7 @@ std::shared_ptr<FN>& node_table<FN>::at(const version_t key){
 }
 
 template <class FN>
-void node_table<FN>::map(const std::vector<std::pair<version_t, version_t>>& to_push){
+void node_table<FN>::map(const std::vector<pds::map_cow>& to_push){
 
     cow_stack.insert(cow_stack.end(), to_push.begin(), to_push.end());
 }
