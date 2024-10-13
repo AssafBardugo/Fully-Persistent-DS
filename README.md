@@ -126,38 +126,33 @@ Ensure that the `tests/` directory contains all relevant unit tests for your dat
 
 ```
 .
-├── include/FPStructs
+├── include
 │   ├── internal/       
-│   │   ├── fat_node.hpp        # Example usage of the library
-│   │   └── fat_node_impl.hpp   # Example usage of the library
+│   │   ├── fat_node.hpp        # Fat Node header for version tracking
+│   │   └── fat_node_impl.hpp   # Fat Node implementation for version tracking
 │   ├── in_develop/
 │   │   ├── fplist/
-│   │   │   ├── fplist.hpp           # Fat Node implementation for tracking versions
-│   │   │   └── fplist_impl.hpp      # Fully Persistent Set template class
-│   │   └── fpstring.hpp        # Example usage of the library
-│   ├── fpset.hpp           # Fat Node implementation for tracking versions
-│   ├── fpset_impl.hpp      # Fully Persistent Set template class
-│   ├── pds_excep.hpp       # Fully Persistent Set template class
-│   └── utils.hpp           # Fully Persistent Set template class
+│   │   │   ├── fplist.hpp
+│   │   │   └── fplist_impl.hpp
+│   │   └── fpstring.hpp
+│   ├── fpset.hpp               # Header for fully persistent set
+│   ├── fpset_impl.hpp          # Implementation of fully persistent set
+│   ├── pds_excep.hpp           # Exception handling for the library
+│   └── utils.hpp               # Utility functions for the library
 ├── tests/
-│   ├── test_fpset.cpp      # Unit tests for the fpset class
-│   ├── test_fplist.cpp     # Unit tests for the fpset class
-│   └── test_fat_node.cpp   # Unit tests for the fpset class
-├── Makefile             # Makefile for building the project
-├── README.md            # Project documentation
-└── Doxyfile             # Doxygen configuration file for generating docs
+│   ├── test_fpset.cpp          # Unit tests for the fpset class
+│   ├── test_fplist.cpp         # Unit tests for the fplist class
+│   └── test_fat_node.cpp       # Unit tests for the fat_node class
+├── Makefile                    # Makefile for building the project
+├── README.md                   # Project documentation
+└── Doxyfile                    # Doxygen configuration file for generating docs
 ```
 
 ## Future Work
 
-- Implement additional fully persistent data structures such as **list**, **string**, and **priority_queue**.
+- Implement fully persistent data structures for **list**, **string**, and **priority_queue**.
 - Explore optimizations for minimizing memory overhead even further.
-- Add support for persistent algorithms, allowing operations over different versions of data structures.
 
 ## Contributing
 
 Contributions are welcome! If you would like to contribute, please fork the repository, create a feature branch, and submit a pull request. Any improvements, optimizations, or bug fixes are greatly appreciated.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
