@@ -1,29 +1,32 @@
 CXX = g++
 CXXFLAGS = -std=c++23 -Wall -Wextra -Werror -Iinclude
 
-HEADERS = include/internal/fat_node.hpp 		\
-          include/internal/fat_node_impl.hpp 	\
-          include/fpset.hpp 					\
-          include/fpset_impl.hpp 				\
-          include/excep.hpp 					\
-          include/utils.hpp						\
-		  tests/tools.hpp
+HEADERS = include/internal/nodes_table.hpp \
+          include/internal/fat_node.hpp \
+          include/fpset.hpp \
+          include/fpset_impl.hpp \
+          include/excep.hpp \
+          include/utils.hpp	\
+          tests/pds_test.hpp
 
-all: test_fat_node test_fpset
+TESTS_SRCS = tests/test_nodes_table.cpp \
+			 tests/test_fat_node.cpp \
+			 tests/test_fpset.cpp \
+			 tests/main.cpp
 
-test_fat_node: test_fat_node.o
+TESTS_OBJS = $(TESTS_SRCS:%.cpp=%.o)
+
+
+all: 
+	./build.sh --memcheck
+
+test: $(TESTS_OBJS)
 	$(CXX) $^ -o $@
 
-test_fat_node.o: tests/test_fat_node.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-test_fpset: test_fpset.o
-	$(CXX) $^ -o $@
-
-test_fpset.o: tests/test_fpset.cpp $(HEADERS)
+tests/%.o: tests/%.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm *.o test test_fat_node test_fpset
+	rm -f tests/*.o tests/test
 
-.PHONY: all clean
+.PHONY: test clean

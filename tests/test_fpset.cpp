@@ -1,9 +1,18 @@
-#include <cassert>
-#include <string>
+#include "pds_test.hpp"
 
-#include "fpset.hpp"
+using namespace pds;
 
-int main() {
+void readme_example();
+
+void test_fpset(){
+    
+
+    //std::cout << "\nALL fpset TESTS PASSED!!\n";
+}
+
+
+
+void readme_example() {
 
     pds::fpset<std::string> my_fpset; // Create a new fpset with first version
     // Version 1: {}
@@ -48,6 +57,4 @@ int main() {
     // fpset can return a set of specific version
     assert(my_fpset.to_set(4) == std::set<std::string>({"a", "c"})); 
     assert(my_fpset.to_set() == std::set<std::string>({"a", "b", "c"})); // All elements
-
-    return 0;
 }
