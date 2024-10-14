@@ -1,7 +1,8 @@
-#ifndef PERSISTENT_DATA_STRUCTURE_TOOLS_HPP
-#define PERSISTENT_DATA_STRUCTURE_TOOLS_HPP
+#ifndef PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP
+#define PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP
 
-#include "internal/fat_node_impl.hpp"
+#include "internal/nodes_table.hpp"
+#include "internal/fat_node.hpp"
 
 namespace pds{
 
@@ -14,4 +15,4 @@ namespace pds{
 
 };
 
-#endif /* PERSISTENT_DATA_STRUCTURE_TOOLS_HPP */
+#endif /* PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP */
