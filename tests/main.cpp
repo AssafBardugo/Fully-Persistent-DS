@@ -1,17 +1,15 @@
 #include "pds_test.hpp"
 
-using namespace pds;
-
 
 int main(int argc, char* argv[]){
 
-    bool run_all = (argc < 2) || argv[1] == "all";
+    bool run_all = (argc < 2) || std::strcmp(argv[1], "all") == 0;
 
     for(int i = 0; i < PDS_TESTS_NUM; ++i){
 
-        if(run_all || argv[1] == tests_name[i]){
+        if(run_all || argv[1] == pds::tests_name[i]){
 
-            tests_func[i]();
+            pds::TestFuncArr[i]();
         }
     }
 

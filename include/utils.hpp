@@ -4,8 +4,10 @@
 #include <cassert>
 #include <cstdbool>
 #include <cstddef>
+#include <cstring>
 #include <exception>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <set>
 #include <span>

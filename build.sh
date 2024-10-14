@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p build
+
 # Defaults:
 action="all"
 memcheck="false"
@@ -38,8 +40,8 @@ make test
 
 # Run the chosen action
 if [ "$memcheck" == "true" ]; then
-    echo "Running Valgrind on selected tests..."
-    valgrind --leak-check=full --error-exitcode=1 ./test $action || exit 1
+    echo "Running DrMemory on selected tests..."
+    drmemory -show_reachable -- ./test $action || exit 1
 else
     echo "Running selected tests..."
     ./test $action

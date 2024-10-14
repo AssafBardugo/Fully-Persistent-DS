@@ -14,7 +14,7 @@ TESTS_SRCS = tests/test_nodes_table.cpp \
 			 tests/test_fpset.cpp \
 			 tests/main.cpp
 
-TESTS_OBJS = $(TESTS_SRCS:%.cpp=%.o)
+TESTS_OBJS = $(TESTS_SRCS:tests/%.cpp=build/%.o)
 
 
 all: 
@@ -23,10 +23,10 @@ all:
 test: $(TESTS_OBJS)
 	$(CXX) $^ -o $@
 
-tests/%.o: tests/%.cpp $(HEADERS)
+build/%.o: tests/%.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f tests/*.o tests/test
+	rm -f build/*.o test
 
-.PHONY: test clean
+.PHONY: all test clean

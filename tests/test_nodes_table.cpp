@@ -1,9 +1,19 @@
-#include "pds_test.hpp"
+#include "internal/nodes_table.hpp"
 
 using namespace pds;
 
 void test_nodes_table_basic();
 void test_nodes_table_map();
+
+
+namespace pds{
+    struct nodes_table_test_t{
+        pds::nodes_table<pds::nodes_table_test_t> left;
+        pds::nodes_table<pds::nodes_table_test_t> right;
+        nodes_table_test_t(const pds::version_t v) 
+            : left(v), right(v) {}
+    };
+};
 
 void test_nodes_table(){
 
