@@ -1,11 +1,10 @@
-#include "tools_tests.hpp"
+#include "pds_test.hpp"
 
 using namespace pds;
 
 
-int main(){
+void test_fat_node(){
 
     
-
-    return 0;
+    //std::cout << "\nALL fat_node TESTS PASSED!!\n";
 }

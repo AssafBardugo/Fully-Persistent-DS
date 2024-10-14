@@ -1,12 +1,11 @@
-#include "tools_tests.hpp"
+#include "pds_test.hpp"
 
 using namespace pds;
 
-/*** test class nodes_table ***/
 void test_nodes_table_basic();
 void test_nodes_table_map();
 
-int main(){
+void test_nodes_table(){
 
     test_nodes_table_basic();
     std::cout << "\ntest_nodes_table_basic PASS\n";
@@ -15,7 +14,6 @@ int main(){
     std::cout << "test_nodes_table_map PASS\n";
 
     std::cout << "\nALL nodes_table TESTS PASSED!!\n";
-    return 0;
 }
 
 
