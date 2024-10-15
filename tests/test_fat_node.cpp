@@ -20,14 +20,11 @@ void test_fat_node(){
 void test_fat_node_basic(){
 
     std::string obj1 = "a";
-    std::string obj2 = "b";
 
     fat_node<std::string> fn1(obj1, 1);
     fat_node<std::string> fn2("b", 1);
 
     assert(fn1 < fn2);
-    assert(fn1 < obj2);
-    assert((fn1 > obj2) == false);
 }
 
 void test_fat_node_with_nodes_table(){

@@ -5,18 +5,13 @@
 #include "excep.hpp"
 
 namespace pds{
-
-    struct map_cow{
-        pds::version_t new_version;
-        pds::version_t old_version;
-    };
     
     template <class FN>
     class nodes_table{
 
         std::unordered_map<pds::version_t, std::shared_ptr<FN>> table;
 
-        std::vector<pds::map_cow> cow_stack;
+        std::vector<std::pair<pds::version_t, pds::version_t>> cow_stack;
 
     public:
         nodes_table(const pds::version_t create_version)
@@ -34,16 +29,6 @@ namespace pds{
         std::shared_ptr<FN>& at(const pds::version_t key){
 
             try{
-                for(map_cow& new_map : cow_stack)
-                    table[new_map.new_version] = table[new_map.old_version];
-
-                if(table.at(key) != nullptr){
-
-                    table.at(key)->left.map(cow_stack);
-                    table.at(key)->right.map(cow_stack);
-                }
-
-                cow_stack.clear();
                 return table.at(key);
             }
             catch(const std::out_of_range& e){
@@ -54,12 +39,27 @@ namespace pds{
             }
         }
 
-        void map(const std::vector<pds::map_cow>& to_push){
+        void copy_map(const pds::version_t key){
+
+            for(auto& new_map : cow_stack){
+
+                table[new_map.first] = table[new_map.second];
+            }
+
+            if(table.at(key) != nullptr){
+
+                table.at(key)->left.extend_stack(cow_stack);
+                table.at(key)->right.extend_stack(cow_stack);
+            }
+
+            cow_stack.clear();
+        }
+
+        void extend_stack(const std::vector<std::pair<pds::version_t, pds::version_t>>& to_push){
 
             cow_stack.insert(cow_stack.end(), to_push.begin(), to_push.end());
-        }
+        }    
     };
-
 };
 
 #endif /* PERSISTENT_DATA_STRUCTURE_NODES_TABLE_HPP */

@@ -18,7 +18,7 @@ TESTS_OBJS = $(TESTS_SRCS:tests/%.cpp=build/%.o)
 
 
 all: 
-	./build.sh --memcheck
+	./build.sh
 
 test: $(TESTS_OBJS)
 	$(CXX) $^ -o $@

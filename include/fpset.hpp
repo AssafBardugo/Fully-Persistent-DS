@@ -148,7 +148,7 @@ namespace pds{
          * @note 
          * Time complexity: O(log(size()))
          */
-        bool contains(const OBJ& obj, pds::version_t version = master_version) const;
+        bool contains(const OBJ& obj, pds::version_t version = master_version);
 
 
         pds::version_t size(pds::version_t version = master_version) const;
@@ -185,5 +185,13 @@ namespace pds{
         bool equal(const pds::version_t version, std::set<OBJ>&& obj_set) const;
     };
 };
+
+using namespace pds;
+
+template <class OBJ>
+static std::shared_ptr<fat_node<OBJ>> dummy_sp(const OBJ& obj){
+
+    return std::make_shared<fat_node<OBJ>>(obj, 0);
+}
 
 #endif /* FULLY_PERSISTENT_SET_HPP */

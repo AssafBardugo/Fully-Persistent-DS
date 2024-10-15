@@ -67,10 +67,8 @@ void test_nodes_table_map(){
     assert(sp1.use_count() == 2);
 
     /* add map from version 1 to version 2 */
-    pds::map_cow map1;
-    map1.new_version = 2;
-    map1.old_version = 1;
-    n_table.map({map1});  // n_table.cow_stack = {{2, 1}}
+    
+    n_table.extend_stack({{2, 1}});  // n_table.cow_stack = {{2, 1}}
     assert(n_table.at(2) == sp1); // n_table.table = {1: sp1, 2: sp1}
     assert(sp1.use_count() == 3);
 
@@ -87,10 +85,7 @@ void test_nodes_table_map(){
     assert(sp1.use_count() == 2);
 
     /* add map from version 2 to version 1 */
-    pds::map_cow map2;
-    map2.new_version = 1;
-    map2.old_version = 2;
-    n_table.map({map2});  // n_table.cow_stack = {{1, 2}}
+    n_table.extend_stack({{1, 2}});  // n_table.cow_stack = {{1, 2}}
     assert(n_table.at(1) == sp2); // n_table.table = {1: sp2, 2: sp2}
     assert(sp2.use_count() == 3);
     assert(sp1.use_count() == 1);
@@ -102,7 +97,7 @@ void test_nodes_table_map(){
     n_table[3] = nullptr; // n_table.table = {1: sp2, 2: sp2, 3: nullptr}
 
     /* map version 1 and version 2 to version 3 */
-    n_table.map({{1, 3}, {2, 3}}); // map 1->3, 2->3
+    n_table.extend_stack({{1, 3}, {2, 3}}); // map 1->3, 2->3
 
     assert(n_table.at(2) == nullptr);
     assert(n_table.at(1) == nullptr); // n_table.table = {1: nullptr, 2: nullptr, 3: nullptr}

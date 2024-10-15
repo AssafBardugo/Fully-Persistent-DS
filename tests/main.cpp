@@ -9,7 +9,13 @@ int main(int argc, char* argv[]){
 
         if(run_all || argv[1] == pds::tests_name[i]){
 
-            pds::TestFuncArr[i]();
+            try{
+                pds::TestFuncArr[i]();
+            }
+            catch(...){
+                std::cout << "\n\nEXCEPTION THROWN!!!\n\n";
+                exit(1);
+            }
         }
     }
 
