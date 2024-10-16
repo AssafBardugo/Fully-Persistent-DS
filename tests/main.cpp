@@ -12,8 +12,19 @@ int main(int argc, char* argv[]){
             try{
                 pds::TestFuncArr[i]();
             }
+            catch(const pds::pdsExcept& e){
+
+                std::cout << std::endl << "pdsExcept: " << std::string(e.what());
+                exit(1);
+            }
+            catch(const std::exception& e){
+
+                std::cout << std::endl << "std::exception: " << std::string(e.what());
+                exit(1);
+            }
             catch(...){
-                std::cout << "\n\nEXCEPTION THROWN!!!\n\n";
+
+                std::cout << "\n\nUNKNOWN EXCEPTION WAS THROWN!!!\n\n";
                 exit(1);
             }
         }

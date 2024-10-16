@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++23 -Wall -Wextra -Werror -Iinclude
 
-HEADERS = include/internal/nodes_table.hpp \
+HEADERS = include/internal/fat_node_tracker.hpp \
           include/internal/fat_node.hpp \
           include/fpset.hpp \
           include/fpset_impl.hpp \
@@ -9,7 +9,7 @@ HEADERS = include/internal/nodes_table.hpp \
           include/utils.hpp	\
           tests/pds_test.hpp
 
-TESTS_SRCS = tests/test_nodes_table.cpp \
+TESTS_SRCS = tests/test_fat_node_tracker.cpp \
 			 tests/test_fat_node.cpp \
 			 tests/test_fpset.cpp \
 			 tests/main.cpp

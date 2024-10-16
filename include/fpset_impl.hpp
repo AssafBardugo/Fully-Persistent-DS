@@ -2,6 +2,7 @@
 #define FULLY_PERSISTENT_SET_IMPLEMENTATION_HPP
 
 #include "fpset.hpp"
+#include "internal/fat_node_tracker.hpp"
 
 using namespace pds;
 
@@ -37,50 +38,44 @@ version_t fpset<OBJ>::insert_impl(T&& obj, version_t version){
             "fpset::insert: Version " + std::to_string(version) + " is out of range"
         );
 
-    if(this->contains(obj, version))
-        throw ObjectAlreadyExist(
-            "fpset::insert: Attempting to insert an object that already exists for Version " 
-            + std::to_string(version)
-        );
+    fat_node_tracker<OBJ> tracker(root);
 
+    while(tracker.not_null_at(version)){
+
+        if(obj < tracker.obj_at(version)){
+
+            tracker = tracker.left_at(version);
+        }
+        else if(tracker.obj_at(version) < obj){
+
+            tracker = tracker.right_at(version);
+        }
+        else{
+            throw ObjectAlreadyExist(
+                "fpset::insert: Attempting to insert an object that already exists for Version " 
+                + std::to_string(version)
+            );
+        }
+        tracker.copy_map(version);
+    }
 
     version_t new_version = last_version + 1;
 
-    // push the size of the new version
-    sizes.push_back(sizes[version] + 1);
-
-    std::shared_ptr<fat_node<OBJ>> new_node_ptr = nullptr;
-
     if(auto search = v_master.find(dummy_sp<OBJ>(obj)); search != v_master.end()){
 
-        new_node_ptr = *search;
-        new_node_ptr->left[new_version] = nullptr;
-        new_node_ptr->right[new_version] = nullptr;
+        tracker[new_version] = *search;
+        tracker.ref_left_at(new_version) = nullptr;
+        tracker.ref_right_at(new_version) = nullptr;
     }
     else{
         auto result = v_master.insert(std::make_shared<fat_node<OBJ>>(std::forward<T>(obj), new_version));
-        new_node_ptr = *result.first;
+        tracker[new_version] = *result.first;
     }
 
-    // extend_stack get the type: vector<pair<version_t, version_t>>
-    root.extend_stack({{new_version, version}});
+    add_new_version(tracker.obj_at(new_version), version);
 
-    pds::nodes_table<pds::fat_node<OBJ>> tracker = root;
-
-    while(tracker.at(version)){
-
-        tracker.copy_map(new_version);
-
-        if(obj < tracker.at(new_version)->obj){
-
-            tracker = tracker.at(new_version)->left;
-        }
-        else{
-            tracker = tracker.at(new_version)->right;
-        }
-    }
-
-    tracker[new_version] = new_node_ptr;
+    // push the size of the new version
+    sizes.push_back(sizes[version] + 1);
 
     return (last_version = new_version);
 }
@@ -97,39 +92,40 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
             "fpset::remove: Version " + std::to_string(version) + " is out of range"
         );
 
-    if(this->contains(obj, version) == false)
+    fat_node_tracker<OBJ> tracker(root);
+
+    while(tracker.not_null_at(version)){
+
+        if(obj < tracker.obj_at(version)){
+
+            tracker = tracker.left_at(version);
+        }
+        else if(tracker.obj_at(version) < obj){
+
+            tracker = tracker.right_at(version);
+        }
+        else break;
+
+        tracker.copy_map(version);
+    }
+
+    if(tracker.null_at(version))
         throw ObjectNotExist(
             "fpset::remove: Attempting to remove an object from Version "
             + std::to_string(version) + ". But the object is not exists for this Version" 
         );
+
     
+    fat_node_tracker<OBJ> to_remove = tracker;
     version_t new_version = last_version + 1;
 
-    // push the size of the new version
-    sizes.push_back(sizes[version] - 1);
+    if(to_remove.left_at(version).null_at(version)){
 
-    nodes_table<fat_node<OBJ>> to_remove = root;
-
-    while(true){
-
-        if(obj < to_remove.at(version)->obj)
-
-            to_remove = to_remove.at(new_version)->left;
-
-        else if(to_remove.at(version)->obj < obj)
-
-            to_remove = to_remove.at(new_version)->right;
-
-        else break;
+        to_remove[new_version] = to_remove.ref_right_at(version);
     }
+    else if(to_remove.right_at(version).null_at(version)){
 
-    if(to_remove.at(version)->left == nullptr){
-
-        to_remove[new_version] = to_remove.at(version)->right;
-    }
-    else if(to_remove.at(version)->right == nullptr){
-
-        to_remove[new_version] = to_remove.at(version)->left;
+        to_remove[new_version] = to_remove.ref_left_at(version);
     }
     else{
 
@@ -147,17 +143,22 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
   
 **********************************************************/
 
-        nodes_table<fat_node<OBJ>> tracker = to_remove.at(version)->right;
+        tracker = to_remove.right_at(version);
 
-        while(tracker.at(version)->left){
+        while(tracker.left_at(version).not_null_at(version)){
 
             tracker[new_version] = tracker.at(version);
-            tracker = tracker.at(version)->left;
+            tracker = tracker.left_at(version);
         }
         tracker[new_version] = nullptr;
 
         to_remove[new_version] = tracker.at(version);
     }
+
+    add_new_version(tracker.obj_at(new_version), version);
+
+    // push the size of the new version
+    sizes.push_back(sizes[version] - 1);
 
     return (last_version = new_version);
 }
@@ -174,18 +175,20 @@ bool fpset<OBJ>::contains(const OBJ& obj, version_t version){
             "fpset::contains: Version " + std::to_string(version) + " is out of range"
         );
 
-    std::shared_ptr<fat_node<OBJ>> tracker = root.at(version);
+    fat_node_tracker<OBJ> tracker(root);
 
-    while(tracker){
+    while(tracker.not_null_at(version)){
 
-        if(obj < tracker->obj)
+        tracker.copy_map(version);
 
-            tracker = tracker->left.at(version);
+        if(obj < tracker.obj_at(version)){
 
-        else if(tracker->obj < obj)
+            tracker = tracker.left_at(version);
+        }
+        else if(tracker.obj_at(version) < obj){
 
-            tracker = tracker->right.at(version);
-
+            tracker = tracker.right_at(version);
+        }
         else return true;
     }
 
@@ -210,17 +213,17 @@ version_t fpset<OBJ>::curr_version() const {
 
 
 template <class OBJ>
-static void to_set_aux(std::shared_ptr<fat_node<OBJ>>& root, 
+static void to_set_aux(const std::shared_ptr<fat_node<OBJ>>& root, 
     const version_t v, std::set<OBJ>& obj_set){
 
     if(root == nullptr)
         return;
 
-    to_set_aux(root->left.at(v), v, obj_set);
+    to_set_aux(root->left.table.at(v), v, obj_set);
 
-    obj_set.insert(root->obj);
+    obj_set.insert(root->get_obj());
 
-    to_set_aux(root->right.at(v), v, obj_set);
+    to_set_aux(root->right.table.at(v), v, obj_set);
 }
 
 
@@ -231,13 +234,13 @@ std::set<OBJ> fpset<OBJ>::to_set(const version_t version) const {
 
     if(version == master_version){
 
-        for(std::shared_ptr<fat_node<OBJ>>& node_ptr : v_master){
+        for(auto& node_ptr : v_master){
 
-            obj_set.insert(node_ptr->obj);
+            obj_set.insert(node_ptr->get_obj());
         }
     }
     else{
-        to_set_aux(root.at(version), version, obj_set);
+        to_set_aux(root.table.at(version), version, obj_set);
     }
 
     return obj_set;

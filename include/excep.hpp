@@ -41,7 +41,9 @@ namespace pds{
                 - pds::fpset::insert_impl
                 - pds::fpset::remove
                 - pds::fpset::contains
-                - pds::nodes_table::at
+                - pds::fat_node_tracker::at
+                - pds::fat_node_tracker::left_at
+                - pds::fat_node_tracker::right_at
         */
     public:
         VersionOutOfRange(std::string&& m) : pdsExcept(std::move(m)){}
@@ -72,6 +74,17 @@ namespace pds{
         */
     public:
         ObjectNotExist(std::string&& m) : pdsExcept(std::move(m)){}
+    };
+
+    class NullTracker : public pdsExcept{
+        /*
+            thrown by:
+                - pds::fat_node_tracker::obj_at
+                - pds::fat_node_tracker::left_at
+                - pds::fat_node_tracker::right_at
+        */
+    public:
+        NullTracker(std::string&& m) : pdsExcept(std::move(m)){}
     };
     
 };

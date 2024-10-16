@@ -10,7 +10,7 @@
 #ifndef FULLY_PERSISTENT_SET_HPP
 #define FULLY_PERSISTENT_SET_HPP
 
-#include "internal/fat_node.hpp"
+#include "internal/fat_node_tracker.hpp"
 
 namespace pds{
 
@@ -171,6 +171,31 @@ namespace pds{
     private:
         template <typename T>
         pds::version_t insert_impl(T&& obj, pds::version_t version);
+
+
+        void add_new_version(const OBJ& obj, const pds::version_t old_version){
+
+            const pds::version_t new_version = last_version + 1;
+
+            root.extend_stack({{new_version, old_version}});
+
+            pds::fat_node_tracker<OBJ> tracker(root);
+
+            while(true){
+
+                tracker.copy_map(old_version);
+
+                if(obj < tracker.obj_at(new_version)){
+
+                    tracker = tracker.left_at(new_version);
+                }
+                else if(tracker.obj_at(new_version) < obj){
+
+                    tracker = tracker.right_at(new_version);
+                }
+                else break;
+            }
+        }
 
 
         /**

@@ -1,8 +1,6 @@
 #ifndef PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP
 #define PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP
 
-#include "internal/nodes_table.hpp"
-#include "internal/fat_node.hpp"
 #include "fpset.hpp"
 
 #define PDS_TESTS_NUM 3
