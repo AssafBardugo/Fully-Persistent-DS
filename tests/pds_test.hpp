@@ -1,6 +1,8 @@
-#ifndef PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP
-#define PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP
+#ifndef PERSISTENT_DATA_STRUCTURE_TEST_HPP
+#define PERSISTENT_DATA_STRUCTURE_TEST_HPP
 
+#include "internal/fat_node.hpp"
+#include "internal/fat_node_tracker.hpp"
 #include "fpset.hpp"
 
 #define PDS_TESTS_NUM 3
@@ -27,4 +29,4 @@ namespace pds{
     };
 };
 
-#endif /* PERSISTENT_DATA_STRUCTURE_TOOLS_TESTS_HPP */
+#endif /* PERSISTENT_DATA_STRUCTURE_TEST_HPP */

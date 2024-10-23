@@ -6,82 +6,47 @@
 
 namespace pds{
 
-    template <class FN>
-    struct nodes_table{
+    template <class OBJ>
+    class fat_node;
 
-        std::unordered_map<pds::version_t, std::shared_ptr<FN>> table;
-        std::vector<std::pair<pds::version_t, pds::version_t>> cow_stack;
+    template <class OBJ>
+    struct fat_node_ptr{
+        std::unordered_map<pds::version_t, std::shared_ptr<pds::fat_node<OBJ>>> table;
+        std::vector<pds::version_t> nodes_versions;
 
-        nodes_table(const pds::version_t create_version);
+        fat_node_ptr(pds::version_t first_version) 
+            : table{first_version, nullptr}, nodes_versions{first_version} {}
 
-        nodes_table(const nodes_table&) = delete;
-        nodes_table& operator=(const nodes_table&) = delete;
+        // for fully persistent only
+        pds::version_t map(pds::version_t version){
 
-        void extend_stack(const std::vector<std::pair<pds::version_t, pds::version_t>>& to_push){
-
-            cow_stack.insert(cow_stack.end(), to_push.begin(), to_push.end());
+            return *std::lower_bound(nodes_versions.begin(), nodes_versions.end(), version);
         }
     };
 
     template <class OBJ>
-    class fat_node{
+    struct fat_node{
+        const std::shared_ptr<OBJ> obj_ptr;
 
-        const OBJ obj;
+        pds::fat_node_ptr<OBJ> left;
+        pds::fat_node_ptr<OBJ> right;
 
-    public:
-        pds::nodes_table<fat_node<OBJ>> left;
-        pds::nodes_table<fat_node<OBJ>> right;
-
-        fat_node(const OBJ& obj, const pds::version_t new_version);
-        fat_node(OBJ&& obj, const pds::version_t new_version);
-
-        fat_node(const fat_node&) = delete;
-        fat_node& operator=(const fat_node&) = delete;
+        fat_node(std::shared_ptr<OBJ>& obj_ptr, pds::version_t version);
 
         const OBJ& get_obj() const;
-
-        bool operator<(const fat_node<OBJ>& other) const;
-        bool operator==(const fat_node<OBJ>& other) const;
     };
 };
 
-using namespace pds;
+template <class OBJ>
+pds::fat_node<OBJ>::fat_node(std::shared_ptr<OBJ>& obj_ptr, pds::version_t version)
 
-template <class FN>
-nodes_table<FN>::nodes_table(const version_t create_version)
-
-    : table{{create_version, nullptr}} {
+    : obj_ptr(obj_ptr), left(version), right(version) {
 }
 
 template <class OBJ>
-fat_node<OBJ>::fat_node(const OBJ& obj, const version_t new_version)
+const OBJ& pds::fat_node<OBJ>::get_obj() const {
 
-    : obj(obj), left(new_version), right(new_version) {
+    return *obj_ptr;
 }
-
-template <class OBJ>
-fat_node<OBJ>::fat_node(OBJ&& obj, const version_t new_version)
-
-    : obj(std::move(obj)), left(new_version), right(new_version) {
-}
-
-template <class OBJ>
-const OBJ& fat_node<OBJ>::get_obj() const {
-
-    return obj;
-}
-
-template <class OBJ>
-bool fat_node<OBJ>::operator<(const fat_node<OBJ>& other) const {
-
-    return obj < other.obj;
-}
-
-template <class OBJ>
-bool fat_node<OBJ>::operator==(const fat_node<OBJ>& other) const {
-
-    return obj == other.obj;
-}
-
 
 #endif /* PERSISTENT_DATA_STRUCTURE_FAT_NODE_HPP */
