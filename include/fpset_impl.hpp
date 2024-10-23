@@ -4,23 +4,21 @@
 #include "fpset.hpp"
 #include "internal/fat_node_tracker.hpp"
 
-using namespace pds;
-
 
 template <class OBJ>
-fpset<OBJ>::fpset() : root(1), last_version(1), sizes{0, 0} {
+pds::fpset<OBJ>::fpset() : root(1), last_version(1), sizes{0, 0} {
 }
 
 
 template <class OBJ>
-version_t fpset<OBJ>::insert(const OBJ& obj, version_t version){
+pds::version_t pds::fpset<OBJ>::insert(const OBJ& obj, pds::version_t version){
 
     return insert_impl(obj, version);
 }
 
 
 template <class OBJ>
-version_t fpset<OBJ>::insert(OBJ&& obj, version_t version){
+pds::version_t pds::fpset<OBJ>::insert(OBJ&& obj, pds::version_t version){
 
     return insert_impl(std::move(obj), version);
 }
@@ -28,17 +26,17 @@ version_t fpset<OBJ>::insert(OBJ&& obj, version_t version){
 
 template <class OBJ>
 template <typename T>
-version_t fpset<OBJ>::insert_impl(T&& obj, version_t version){
+pds::version_t pds::fpset<OBJ>::insert_impl(T&& obj, pds::version_t version){
 
     if(version == default_version)
         version = last_version;
 
     if(version == 0 || version > last_version)
-        throw VersionOutOfRange(
-            "fpset::insert: Version " + std::to_string(version) + " is out of range"
+        throw pds::VersionOutOfRange(
+            "pds::fpset::insert: Version " + std::to_string(version) + " is out of range"
         );
 
-    fat_node_tracker<OBJ> tracker(root);
+    pds::fat_node_tracker<OBJ> tracker(root);
 
     while(tracker.not_null_at(version)){
 
@@ -51,24 +49,25 @@ version_t fpset<OBJ>::insert_impl(T&& obj, version_t version){
             tracker = tracker.right_at(version);
         }
         else{
-            throw ObjectAlreadyExist(
-                "fpset::insert: Attempting to insert an object that already exists for Version " 
+            throw pds::ObjectAlreadyExist(
+                "pds::fpset::insert: Attempting to insert an object that already exists for Version " 
                 + std::to_string(version)
             );
         }
         tracker.copy_map(version);
     }
 
-    version_t new_version = last_version + 1;
+    pds::version_t new_version = last_version + 1;
 
-    if(auto search = v_master.find(dummy_sp<OBJ>(obj)); search != v_master.end()){
+    if(auto search = v_master.find(pds::fat_node<OBJ>::dummy_sp(obj)); 
+            search != v_master.end()){
 
         tracker[new_version] = *search;
         tracker.ref_left_at(new_version) = nullptr;
         tracker.ref_right_at(new_version) = nullptr;
     }
     else{
-        auto result = v_master.insert(std::make_shared<fat_node<OBJ>>(std::forward<T>(obj), new_version));
+        auto result = v_master.insert(std::make_shared<pds::fat_node<OBJ>>(std::forward<T>(obj), new_version));
         tracker[new_version] = *result.first;
     }
 
@@ -82,17 +81,17 @@ version_t fpset<OBJ>::insert_impl(T&& obj, version_t version){
 
 
 template <class OBJ>
-version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
+pds::version_t pds::fpset<OBJ>::remove(const OBJ& obj, pds::version_t version){
 
     if(version == default_version)
         version = last_version;
 
     if(version == 0 || version > last_version)
-        throw VersionOutOfRange(
-            "fpset::remove: Version " + std::to_string(version) + " is out of range"
+        throw pds::VersionOutOfRange(
+            "pds::fpset::remove: Version " + std::to_string(version) + " is out of range"
         );
 
-    fat_node_tracker<OBJ> tracker(root);
+    pds::fat_node_tracker<OBJ> tracker(root);
 
     while(tracker.not_null_at(version)){
 
@@ -110,14 +109,14 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
     }
 
     if(tracker.null_at(version))
-        throw ObjectNotExist(
-            "fpset::remove: Attempting to remove an object from Version "
+        throw pds::ObjectNotExist(
+            "pds::fpset::remove: Attempting to remove an object from Version "
             + std::to_string(version) + ". But the object is not exists for this Version" 
         );
 
     
-    fat_node_tracker<OBJ> to_remove = tracker;
-    version_t new_version = last_version + 1;
+    pds::fat_node_tracker<OBJ> to_remove = tracker;
+    pds::version_t new_version = last_version + 1;
 
     if(to_remove.left_at(version).null_at(version)){
 
@@ -165,17 +164,17 @@ version_t fpset<OBJ>::remove(const OBJ& obj, version_t version){
 
 
 template <class OBJ>
-bool fpset<OBJ>::contains(const OBJ& obj, version_t version){
+bool pds::fpset<OBJ>::contains(const OBJ& obj, pds::version_t version){
 
     if(version == master_version)
         return v_master.contains(dummy_sp<OBJ>(obj));
 
     if(version > last_version)
-        throw VersionOutOfRange(
-            "fpset::contains: Version " + std::to_string(version) + " is out of range"
+        throw pds::VersionOutOfRange(
+            "pds::fpset::contains: Version " + std::to_string(version) + " is out of range"
         );
 
-    fat_node_tracker<OBJ> tracker(root);
+    pds::fat_node_tracker<OBJ> tracker(root);
 
     while(tracker.not_null_at(version)){
 
@@ -197,7 +196,7 @@ bool fpset<OBJ>::contains(const OBJ& obj, version_t version){
 
 
 template <class OBJ>
-version_t fpset<OBJ>::size(version_t version) const {
+pds::version_t pds::fpset<OBJ>::size(pds::version_t version) const {
 
     if(version == master_version)
         return v_master.size();
@@ -207,14 +206,14 @@ version_t fpset<OBJ>::size(version_t version) const {
 
 
 template <class OBJ>
-version_t fpset<OBJ>::curr_version() const {
+pds::version_t pds::fpset<OBJ>::curr_version() const {
     return last_version;
 }
 
 
 template <class OBJ>
-static void to_set_aux(const std::shared_ptr<fat_node<OBJ>>& root, 
-    const version_t v, std::set<OBJ>& obj_set){
+static void to_set_aux(const std::shared_ptr<pds::fat_node<OBJ>>& root, 
+    const pds::version_t v, std::set<OBJ>& obj_set){
 
     if(root == nullptr)
         return;
@@ -228,7 +227,7 @@ static void to_set_aux(const std::shared_ptr<fat_node<OBJ>>& root,
 
 
 template <class OBJ>
-std::set<OBJ> fpset<OBJ>::to_set(const version_t version) const {
+std::set<OBJ> pds::fpset<OBJ>::to_set(const pds::version_t version) const {
 
     std::set<OBJ> obj_set;
 
@@ -248,7 +247,7 @@ std::set<OBJ> fpset<OBJ>::to_set(const version_t version) const {
 
 
 template <class OBJ>
-bool fpset<OBJ>::equal(const version_t version, std::set<OBJ>&& obj_set) const {
+bool pds::fpset<OBJ>::equal(const pds::version_t version, std::set<OBJ>&& obj_set) const {
 
     return to_set(version) == obj_set;
 }

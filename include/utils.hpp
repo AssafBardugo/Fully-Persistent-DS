@@ -21,9 +21,8 @@
 
 
 namespace pds{
-    
-    using version_t = std::size_t;
 
+    using version_t = std::size_t;
 
     template <class T>
     void print_span(std::span<T> v_arr){

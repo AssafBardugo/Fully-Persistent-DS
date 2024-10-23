@@ -55,6 +55,7 @@ namespace pds{
     class fpset{
 
         pds::nodes_table<pds::fat_node<OBJ>> root;
+        std::unordered_map<pds::version_t, pds::version_t> version_map;
         std::set<std::shared_ptr<pds::fat_node<OBJ>>> v_master;
         pds::version_t last_version;
         std::vector<pds::version_t> sizes;
@@ -210,13 +211,5 @@ namespace pds{
         bool equal(const pds::version_t version, std::set<OBJ>&& obj_set) const;
     };
 };
-
-using namespace pds;
-
-template <class OBJ>
-static std::shared_ptr<fat_node<OBJ>> dummy_sp(const OBJ& obj){
-
-    return std::make_shared<fat_node<OBJ>>(obj, 0);
-}
 
 #endif /* FULLY_PERSISTENT_SET_HPP */

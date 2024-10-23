@@ -13,6 +13,8 @@ The project is highly modular, using templates to support arbitrary data types a
 
 ## Features
 
+- **Space Complexity**: O(n) compering to O(n log n) for copy-path - the more conveniens implementation. In addition, fat node save for every user-obj excatly one copy even if obj located in different positions for different versions.
+- 
 - **Efficient Version Control**: Easily access and work with different versions of a data structure.
 - **Fast Querying**: Implements version management using a Binary Search Tree (BST) for efficient access.
 - **Optimized Memory Usage**: Keeps only one copy of each object, regardless of the number of versions to which it has been added.
