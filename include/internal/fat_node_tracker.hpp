@@ -11,261 +11,362 @@ namespace pds{
         pds::fat_node_ptr<OBJ>* ptr;
         pds::version_t track_version;
 
-        /** for fpset support **/
-        // pds::version_t prev_key;
-        /**/
-
     public:
-        fat_node_tracker(pds::fat_node_ptr<OBJ>& root, pds::version_t version) 
+        fat_node_tracker(pds::fat_node_ptr<OBJ>& root);
 
-            : ptr(&root), track_version(version) {
-        }
+        std::shared_ptr<pds::fat_node<OBJ>>& operator[](const pds::version_t new_version);
 
-        fat_node_tracker(const fat_node_tracker&) = default;
-        fat_node_tracker(fat_node_tracker&&) = default;
-        fat_node_tracker& operator=(const fat_node_tracker&) = default;
-        fat_node_tracker& operator=(fat_node_tracker&&) = default;
+        std::shared_ptr<pds::fat_node<OBJ>> operator*() const;
 
+        std::shared_ptr<pds::fat_node<OBJ>> at(pds::version_t version) const;
 
-        std::shared_ptr<pds::fat_node<OBJ>>& operator[](const pds::version_t new_version){
+        bool null() const;
+        bool null_at(pds::version_t version) const;
+        bool not_null() const;
+        bool not_null_at(pds::version_t version) const;
 
-            ptr->nodes_versions.push_back(new_version);
-            return ptr->table[new_version];
-        }
+        const OBJ& obj() const;
+        const OBJ& obj_at(pds::version_t version) const;
 
-        std::shared_ptr<fat_node<OBJ>> operator*() const {
+        fat_node_tracker<OBJ>& left();
+        fat_node_tracker<OBJ>& right();
+        fat_node_tracker<OBJ>& left_at(pds::version_t version);
+        fat_node_tracker<OBJ>& right_at(pds::version_t version);
 
-            return ptr->table.at(track_version);
-        }
+        bool left_null() const;
+        bool right_null() const;
 
-        bool null() const {
+        std::shared_ptr<fat_node<OBJ>> get_left() const;
+        std::shared_ptr<fat_node<OBJ>> get_right() const;
 
-            return ptr->table.at(track_version) == nullptr;
-        }
+        std::shared_ptr<fat_node<OBJ>>& set_left(const pds::version_t new_version);
+        std::shared_ptr<fat_node<OBJ>>& set_right(const pds::version_t new_version);
 
-        bool not_null() const {
-
-            return ptr->table.at(track_version) != nullptr;
-        }
-
-        const std::shared_ptr<OBJ> obj() const {
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "obj: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-
-            return ptr->table.at(track_version)->obj_ptr;
-        }
-
-        fat_node_tracker<OBJ>& left(){
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "left: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-
-            try{
-                ptr = &(ptr->table.at(track_version)->left);
-            }
-            catch(const std::out_of_range& e){
-
-                throw pds::VersionOutOfRange(
-                    "fat_node_tracker::left: std::out_of_range::what(): " + std::string(e.what())
-                );
-            }
-            track_version = ptr->nodes_versions.back();
-            return *this;
-        }
-
-        fat_node_tracker<OBJ>& right(){
-            
-            if(this->null())
-                throw pds::NullTracker(
-                    "right: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-
-            try{
-                ptr = &(ptr->table.at(track_version)->right);
-            }
-            catch(const std::out_of_range& e){
-
-                throw pds::VersionOutOfRange(
-                    "fat_node_tracker::right: std::out_of_range::what(): " + std::string(e.what())
-                );
-            }
-            track_version = ptr->nodes_versions.back();
-            return *this;
-        }
-
-        bool left_null(){
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "left_null: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-            
-            return ptr->table.at(track_version)->left->table.at(track_version) == nullptr;
-        }
-
-        bool right_null(){
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "right_null: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-            
-            return ptr->table.at(track_version)->right->table.at(track_version) == nullptr;
-        }
-
-        std::shared_ptr<fat_node<OBJ>> get_left(){
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "copy_left: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-
-            return ptr->table.at(track_version)->left->table.at(track_version);
-        }
-
-        std::shared_ptr<fat_node<OBJ>> get_right(){
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "copy_right: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-
-            return ptr->table.at(track_version)->right->table.at(track_version);
-        }
-
-        std::shared_ptr<fat_node<OBJ>>& set_left(const pds::version_t new_version){
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "set_left: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-
-            return ptr->table.at(track_version)->left->table[new_version];
-        }
-
-        std::shared_ptr<fat_node<OBJ>>& set_right(const pds::version_t new_version){
-
-            if(this->null())
-                throw pds::NullTracker(
-                    "set_right: table.at(" + std::to_string(track_version) + ") is nullptr"
-                );
-
-            return ptr->table.at(track_version)->right->table[new_version];
-        }
-
-
-
-        const std::shared_ptr<fat_node<OBJ>>& at(const pds::version_t key) const {
-
-            try{
-                return ptr->table.at(track_version);
-            }
-            catch(const std::out_of_range& e){
-
-                throw pds::VersionOutOfRange(
-                    "nodes_table::at: std::out_of_range::what(): " + std::string(e.what())
-                );
-            }
-        }
-
-        bool null_at(const pds::version_t key) const {
-
-            return ptr->table.at(key) == nullptr;
-        }
-        
-        bool not_null_at(const pds::version_t key) const {
-
-            return ptr->table.at(key) != nullptr; 
-        }
-
-        const OBJ& obj_at(const pds::version_t key) const {
-
-            if(ptr->table.at(key) == nullptr)
-                throw pds::NullTracker(
-                    "obj_at: table.at(" + std::to_string(key) + ") is nullptr"
-                );
-
-            return this->at(key)->get_obj();
-        }
-
-        fat_node_tracker<OBJ>& left_at(const pds::version_t key){
-
-            if(ptr->table.at(key) == nullptr)
-                throw pds::NullTracker(
-                    "left_at: table.at(" + std::to_string(key) + ") is nullptr"
-                );
-
-            /** for fpset support **/
-            // if(ptr->table.contains(track_key) == false){
-
-            //     prev_key = ptr->table.lower_bound(prev_key);
-            // }
-            /**/
-
-            try{
-                ptr = &(ptr->table.at(key)->left);
-            }
-            catch(const std::out_of_range& e){
-
-                throw pds::VersionOutOfRange(
-                    "nodes_table::left_at: std::out_of_range::what(): " + std::string(e.what())
-                );
-            }
-            track_version = ptr->map(track_version);
-            return *this;
-        }
-
-        fat_node_tracker<OBJ>& right_at(const pds::version_t key){
-
-            if(ptr->table.at(key) == nullptr)
-                throw pds::NullTracker(
-                    "right_at: table.at(" + std::to_string(key) + ") is nullptr"
-                );
-
-            try{
-                ptr = &(ptr->table.at(key)->right);
-            }
-            catch(const std::out_of_range& e){
-
-                throw pds::VersionOutOfRange(
-                    "nodes_table::right_at: std::out_of_range::what(): " + std::string(e.what())
-                );
-            }
-            return *this;
-        }
-
-        std::shared_ptr<fat_node<OBJ>>& ref_left_at(const pds::version_t key){
-
-            return this->left_at(key).operator[](key);
-        }
-
-        std::shared_ptr<fat_node<OBJ>>& ref_right_at(const pds::version_t key){
-
-            return this->right_at(key).operator[](key);
-        }
-
-        void copy_map(const pds::version_t key){
-
-            for(auto& new_map : ptr->cow_stack){
-
-                ptr->table[new_map.first] = ptr->table[new_map.second];
-            }
-
-            if(ptr->table.at(key) != nullptr){
-
-                ptr->table.at(key)->left.extend_stack(ptr->cow_stack);
-                ptr->table.at(key)->right.extend_stack(ptr->cow_stack);
-            }
-
-            ptr->cow_stack.clear();
-        }
-
+        void set_track_version(const pds::version_t new_version);
     };
 };
+
+template <class OBJ>
+pds::fat_node_tracker<OBJ>::fat_node_tracker(pds::fat_node_ptr<OBJ>& root) 
+        
+    : ptr(&root), track_version(ptr->nodes_versions.back()) {
+}
+
+template <class OBJ>
+std::shared_ptr<pds::fat_node<OBJ>>& pds::fat_node_tracker<OBJ>::operator[](const pds::version_t new_version){
+
+    if(new_version != MASTER_VERSION){
+        ptr->nodes_versions.push_back(new_version);
+    }
+    return ptr->table[new_version];
+}
+
+template <class OBJ>
+std::shared_ptr<pds::fat_node<OBJ>> pds::fat_node_tracker<OBJ>::operator*() const {
+
+    try{
+        return ptr->table.at(track_version);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::operator*: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+std::shared_ptr<pds::fat_node<OBJ>> pds::fat_node_tracker<OBJ>::at(pds::version_t version) const {
+
+    version = ptr->map(version);
+
+    try{
+        return ptr->table.at(version);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::at: Version " + std::to_string(version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+bool pds::fat_node_tracker<OBJ>::null() const {
+    
+    try{
+        return ptr->table.at(track_version) == nullptr;
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::null: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+bool pds::fat_node_tracker<OBJ>::null_at(pds::version_t version) const {
+
+    version = ptr->map(version);
+    
+    try{
+        return ptr->table.at(version) == nullptr;
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::null_at: Version " + std::to_string(version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+bool pds::fat_node_tracker<OBJ>::not_null() const {
+
+    try{
+        return ptr->table.at(track_version) != nullptr;
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::not_null: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+bool pds::fat_node_tracker<OBJ>::not_null_at(pds::version_t version) const {
+
+    version = ptr->map(version);
+
+    try{
+        return ptr->table.at(version) != nullptr;
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::not_null_at: Version " + std::to_string(version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+const OBJ& pds::fat_node_tracker<OBJ>::obj() const {
+
+    PDS_THROW_IF_NULL_TRACKER("obj", track_version);
+
+    try{
+        return ptr->table.at(track_version)->get_obj();
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::obj: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+const OBJ& pds::fat_node_tracker<OBJ>::obj_at(pds::version_t version) const {
+
+    version = ptr->map(version);
+
+    PDS_THROW_IF_NULL_TRACKER("obj_at", version);
+
+    try{
+        return ptr->table.at(version)->get_obj();
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::obj_at: Version " + std::to_string(version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+pds::fat_node_tracker<OBJ>& pds::fat_node_tracker<OBJ>::left(){
+
+    PDS_THROW_IF_NULL_TRACKER("left", track_version);
+
+    try{
+        ptr = &(ptr->table.at(track_version)->left);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::left: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+    track_version = ptr->nodes_versions.back();
+    return *this;
+}
+
+template <class OBJ>
+pds::fat_node_tracker<OBJ>& pds::fat_node_tracker<OBJ>::right(){
+    
+    PDS_THROW_IF_NULL_TRACKER("right", track_version);
+
+    try{
+        ptr = &(ptr->table.at(track_version)->right);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::right: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+    track_version = ptr->nodes_versions.back();
+    return *this;
+}
+
+template <class OBJ>
+pds::fat_node_tracker<OBJ>& pds::fat_node_tracker<OBJ>::left_at(pds::version_t version){
+
+    version = ptr->map(version);
+
+    PDS_THROW_IF_NULL_TRACKER("left_at", version);
+
+    try{
+        ptr = &(ptr->table.at(version)->left);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::left_at: Version " + std::to_string(version) + " is not exist"
+        );
+    }
+    return *this;
+}
+
+template <class OBJ>
+pds::fat_node_tracker<OBJ>& pds::fat_node_tracker<OBJ>::right_at(pds::version_t version){
+
+    version = ptr->map(version);
+    
+    PDS_THROW_IF_NULL_TRACKER("right_at", version);
+
+    try{
+        ptr = &(ptr->table.at(version)->right);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::right_at: Version " + std::to_string(version) + " is not exist"
+        );
+    }
+    return *this;
+}
+
+template <class OBJ>
+bool pds::fat_node_tracker<OBJ>::left_null() const {
+
+    PDS_THROW_IF_NULL_TRACKER("left_null", track_version);
+    
+    try{
+        pds::version_t left_track_version = ptr->table.at(track_version)->left.nodes_versions.back();
+        return ptr->table.at(track_version)->left.table.at(left_track_version) == nullptr;
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::left_null: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+bool pds::fat_node_tracker<OBJ>::right_null() const {
+
+    PDS_THROW_IF_NULL_TRACKER("right_null", track_version);
+
+    try{
+        pds::version_t right_track_version = ptr->table.at(track_version)->right.nodes_versions.back();
+        return ptr->table.at(track_version)->right.table.at(right_track_version) == nullptr;
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::right_null: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+std::shared_ptr<pds::fat_node<OBJ>> pds::fat_node_tracker<OBJ>::get_left() const {
+
+    PDS_THROW_IF_NULL_TRACKER("get_left", track_version);
+
+    try{
+        pds::version_t left_track_version = ptr->table.at(track_version)->left.nodes_versions.back();
+        return ptr->table.at(track_version)->left.table.at(left_track_version);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::get_left: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+std::shared_ptr<pds::fat_node<OBJ>> pds::fat_node_tracker<OBJ>::get_right() const {
+
+    PDS_THROW_IF_NULL_TRACKER("get_right", track_version);
+
+    try{
+        pds::version_t right_track_version = ptr->table.at(track_version)->right.nodes_versions.back();
+        return ptr->table.at(track_version)->right.table.at(right_track_version);
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::get_right: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+std::shared_ptr<pds::fat_node<OBJ>>& pds::fat_node_tracker<OBJ>::set_left(const pds::version_t new_version){
+
+    PDS_THROW_IF_NULL_TRACKER("set_left", new_version);
+
+    try{
+        ptr->table.at(track_version)->left.nodes_versions.push_back(new_version);
+        return ptr->table.at(track_version)->left.table[new_version];
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::set_left: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+std::shared_ptr<pds::fat_node<OBJ>>& pds::fat_node_tracker<OBJ>::set_right(const pds::version_t new_version){
+
+    PDS_THROW_IF_NULL_TRACKER("set_right", track_version);
+
+    try{
+        ptr->table.at(track_version)->right.nodes_versions.push_back(new_version);
+        return ptr->table.at(track_version)->right.table[new_version];
+    }
+    catch(const std::out_of_range&){
+
+        throw pds::VersionNotExist(
+            "fat_node_tracker::set_right: Version " + std::to_string(track_version) + " is not exist"
+        );
+    }
+}
+
+template <class OBJ>
+void pds::fat_node_tracker<OBJ>::set_track_version(const pds::version_t new_version){
+
+    PDS_THROW_IF_NULL_TRACKER("set_track_version", new_version);
+
+    track_version = new_version;
+}
 
 #endif /* PERSISTENT_DATA_STRUCTURE_FAT_NODE_TRACKER_HPP */

@@ -18,50 +18,28 @@ namespace pds{
         }
     };
 
-    class VersionZero : public pdsExcept {
-        /*
-            thrown by:
-                - pds::fat_node C'tor
-        */
-    public:
-        VersionZero(std::string&& m) : pdsExcept(std::move(m)){}
-    };
 
-    class VersionAlreadyExist : public pdsExcept {
-        /*
-            thrown by:
-        */
-    public:
-        VersionAlreadyExist(std::string&& m) : pdsExcept(std::move(m)){}
-    };
-
-    class VersionOutOfRange : public pdsExcept {
+    class VersionNotExist : public pdsExcept {
         /*
             thrown by:
                 - pds::fpset::insert_impl
                 - pds::fpset::remove
                 - pds::fpset::contains
-                - pds::fat_node_tracker::at
-                - pds::fat_node_tracker::left_at
-                - pds::fat_node_tracker::right_at
-        */
-    public:
-        VersionOutOfRange(std::string&& m) : pdsExcept(std::move(m)){}
-    };
 
-    class VersionHasNullNext : public pdsExcept {
-        /*
-            thrown by:
-                - pds::fpset::insert
+                - pds::pset::contains
+                - pds::pset::to_vector
+                - pds::pset::print
+                
+                - pds::fat_node_tracker
         */
     public:
-        VersionHasNullNext(std::string&& m) : pdsExcept(std::move(m)){}
+        VersionNotExist(std::string&& m) : pdsExcept(std::move(m)){}
     };
 
     class ObjectAlreadyExist : public pdsExcept{
         /*
             thrown by:
-                - pds::fpset::insert_impl
+                - pds::pset::insert_impl
         */
     public:
         ObjectAlreadyExist(std::string&& m) : pdsExcept(std::move(m)){}
@@ -70,7 +48,7 @@ namespace pds{
     class ObjectNotExist : public pdsExcept{
         /*
             thrown by:
-                - pds::fpset::remove
+                - pds::pset::remove
         */
     public:
         ObjectNotExist(std::string&& m) : pdsExcept(std::move(m)){}
@@ -79,14 +57,11 @@ namespace pds{
     class NullTracker : public pdsExcept{
         /*
             thrown by:
-                - pds::fat_node_tracker::obj_at
-                - pds::fat_node_tracker::left_at
-                - pds::fat_node_tracker::right_at
+                - pds::fat_node_tracker
         */
     public:
         NullTracker(std::string&& m) : pdsExcept(std::move(m)){}
     };
-    
 };
 
 #endif /* PERSISTENT_DATA_STRUCTURE_EXCEPTIONS_HPP */
