@@ -1,4 +1,4 @@
-#include "internal/fat_node.hpp"
+#include "internal/FatNode.hpp"
 
 using namespace pds;
 

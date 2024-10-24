@@ -1,7 +1,7 @@
 #ifndef PERSISTENT_DATA_STRUCTURE_UNION_FIND_HPP
 #define PERSISTENT_DATA_STRUCTURE_UNION_FIND_HPP
 
-#include "fat_node.hpp"
+#include "FatNode.hpp"
 
 class UnionFind{
 
