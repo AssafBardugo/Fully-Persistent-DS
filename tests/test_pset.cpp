@@ -33,15 +33,15 @@ void test_pset(){
         test_edge_case_2();
         test_print();
     }
-    catch(const pds::pdsExcept& e){
-        std::cout << "pdsExcept: " << e.what() << std::endl;
+    catch(const pdsExcept& e){
+        cout << "pdsExcept: " << e.what() << endl;
         exit(1);
     }
-    catch(const std::exception& e){
-        std::cout << "Exception: " << e.what() << std::endl;
+    catch(const exception& e){
+        cout << "Exception: " << e.what() << endl;
         exit(1);
     }
-    std::cout << "ALL pset tests PASSED!!" << std::endl;
+    cout << "ALL pset tests PASSED!!" << endl;
 }
 
 
@@ -90,7 +90,7 @@ void test_basic(){
     assert(ps.size() == 3);
     assert(ps.to_vector() == objs);
 
-    std::cout << "test_basic PASSED!" << std::endl;
+    cout << "test_basic PASSED!" << endl;
 }
 
 
@@ -139,7 +139,7 @@ void test_insert(){
     vector<int> ps_vec_all = ps.to_vector(); // master version
     assert(ps_vec_all == versions[PDS_RAND_ARR_SIZE - 1]);
 
-    std::cout << "test_insert PASSED!" << std::endl;
+    cout << "test_insert PASSED!" << endl;
 }
 
 
@@ -186,8 +186,8 @@ void test_remove(){
 
     /// remove: ///////////////////
 
-    pds::version_t curr_v = PDS_RAND_ARR_SIZE - 1;
-    pds::version_t ps_size = PDS_RAND_ARR_SIZE - 2;
+    version_t curr_v = PDS_RAND_ARR_SIZE - 1;
+    version_t ps_size = PDS_RAND_ARR_SIZE - 2;
 
     for(int v = 2; v < PDS_RAND_ARR_SIZE; ++v){ 
 
@@ -209,7 +209,7 @@ void test_remove(){
     ps_vec = ps.to_vector(); // take all from master_version
     assert(ps_vec == all_objs);
 
-    std::cout << "test_remove PASSED!" << std::endl;
+    cout << "test_remove PASSED!" << endl;
 }
 
 
@@ -249,7 +249,7 @@ void test_insert_removed_objects(){
 
     assert(ps.size() == PDS_CONTAINS_SIZE);
 
-    std::cout << "test_insert_removed_objects PASSED!" << std::endl;
+    cout << "test_insert_removed_objects PASSED!" << endl;
 }
 
 
@@ -284,7 +284,7 @@ void test_contains(){
         assert(ps.contains(objs[v]) == true);
     }
 
-    pds::version_t curr_v = PDS_CONTAINS_SIZE - 1;
+    version_t curr_v = PDS_CONTAINS_SIZE - 1;
     for(size_t v = 2; v < PDS_CONTAINS_SIZE; ++v){ 
 
         ++curr_v;
@@ -301,7 +301,7 @@ void test_contains(){
 
     // and last check..
     assert(ps.curr_version() == curr_v);
-    pds::version_t last_version = curr_v;
+    version_t last_version = curr_v;
     for(size_t v = 2; v < PDS_CONTAINS_SIZE; ++v){
 
         assert(ps.contains(objs[v], last_version) == false);  // last_version should be empty
@@ -309,7 +309,7 @@ void test_contains(){
     }
     assert(ps.size(last_version) == 0);
 
-    std::cout << "test_contains PASSED!" << std::endl;
+    cout << "test_contains PASSED!" << endl;
 }
 
 
@@ -395,14 +395,14 @@ void test_size_and_to_vector(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    std::cout << "test_size_and_to_vector PASSED!" << std::endl;
+    cout << "test_size_and_to_vector PASSED!" << endl;
 }
 
 
 void test_exceptions(){
 
     // TODO
-    std::cout << "test_exceptions PASSED!" << std::endl;
+    cout << "test_exceptions PASSED!" << endl;
 }
 
 
@@ -433,7 +433,7 @@ void test_edge_case_1(){
         }
     }
 
-    std::cout << "test_edge_case_1 PASSED!" << std::endl;
+    cout << "test_edge_case_1 PASSED!" << endl;
 }
 
 
@@ -479,7 +479,7 @@ void test_edge_case_2(){
         {}
     };
 
-    pset<std::string> ps;
+    pset<string> ps;
     size_t curr_v = 1;
 
     for(size_t i = 0; i < objs.size(); ++i){
@@ -502,7 +502,7 @@ void test_edge_case_2(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    std::cout << "test_edge_case_2 PASSED!" << std::endl;
+    cout << "test_edge_case_2 PASSED!" << endl;
 }
 
 

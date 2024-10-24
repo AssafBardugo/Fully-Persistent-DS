@@ -1,32 +1,15 @@
-CXX = g++
-CXXFLAGS = -std=c++23 -Wall -Wextra -Werror -Iinclude
+all: clean test
+	./test
 
-HEADERS = include/internal/fat_node_tracker.hpp \
-          include/internal/fat_node.hpp \
-          include/fpset.hpp \
-          include/fpset_impl.hpp \
-          include/excep.hpp \
-          include/utils.hpp	\
-          tests/pds_test.hpp
+HEADERS = include/fpset.hpp \
+			include/internal/excep.hpp \
+			include/internal/utils.hpp \
+			include/internal/FatNode.hpp \
+			include/internal/UnionFind.hpp \
+			include/internal/fptracker.hpp
 
-TESTS_SRCS = tests/test_fat_node_tracker.cpp \
-			 tests/test_fat_node.cpp \
-			 tests/test_fpset.cpp \
-			 tests/main.cpp
-
-TESTS_OBJS = $(TESTS_SRCS:tests/%.cpp=build/%.o)
-
-
-all: 
-	./build.sh
-
-test: $(TESTS_OBJS)
-	$(CXX) $^ -o $@
-
-build/%.o: tests/%.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+test: tests/test_fpset.cpp $(HEADERS)
+	g++ -std=c++23 -Wall -Wextra -Werror -Iinclude tests/test_fpset.cpp -o test
 
 clean:
-	rm -f build/*.o test
-
-.PHONY: all test clean
+	rm -f tests/test_fpset.o test

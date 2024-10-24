@@ -1,7 +1,7 @@
 #ifndef PERSISTENT_DATA_STRUCTURE_FAT_NODE_TRACKER_HPP
 #define PERSISTENT_DATA_STRUCTURE_FAT_NODE_TRACKER_HPP
 
-#include "fat_node.hpp"
+#include "FatNode.hpp"
 
 namespace pds{
 
@@ -41,8 +41,6 @@ namespace pds{
 
         std::shared_ptr<fat_node<OBJ>>& set_left(const pds::version_t new_version);
         std::shared_ptr<fat_node<OBJ>>& set_right(const pds::version_t new_version);
-
-        void set_track_version(const pds::version_t new_version);
     };
 };
 
@@ -55,7 +53,7 @@ pds::fat_node_tracker<OBJ>::fat_node_tracker(pds::fat_node_ptr<OBJ>& root)
 template <class OBJ>
 std::shared_ptr<pds::fat_node<OBJ>>& pds::fat_node_tracker<OBJ>::operator[](const pds::version_t new_version){
 
-    if(new_version != MASTER_VERSION){
+    if(new_version != MasterVersion){
         ptr->nodes_versions.push_back(new_version);
     }
     return ptr->table[new_version];
@@ -359,14 +357,6 @@ std::shared_ptr<pds::fat_node<OBJ>>& pds::fat_node_tracker<OBJ>::set_right(const
             "fat_node_tracker::set_right: Version " + std::to_string(track_version) + " is not exist"
         );
     }
-}
-
-template <class OBJ>
-void pds::fat_node_tracker<OBJ>::set_track_version(const pds::version_t new_version){
-
-    PDS_THROW_IF_NULL_TRACKER("set_track_version", new_version);
-
-    track_version = new_version;
 }
 
 #endif /* PERSISTENT_DATA_STRUCTURE_FAT_NODE_TRACKER_HPP */

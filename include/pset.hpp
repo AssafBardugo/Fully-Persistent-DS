@@ -1,7 +1,7 @@
 #ifndef PARTIALLY_PERSISTENT_SET_HPP
 #define PARTIALLY_PERSISTENT_SET_HPP
 
-#include "internal/fat_node_tracker.hpp"
+#include "internal/ptracker.hpp"
 
 namespace pds{
 
@@ -21,15 +21,15 @@ namespace pds{
         pds::version_t remove(const OBJ& obj);
         pds::version_t remove(OBJ&& obj);
 
-        bool contains(const OBJ& obj, pds::version_t version = MASTER_VERSION);
+        bool contains(const OBJ& obj, pds::version_t version = MasterVersion);
     
-        std::vector<OBJ> to_vector(const pds::version_t version = MASTER_VERSION);
+        std::vector<OBJ> to_vector(const pds::version_t version = MasterVersion);
 
-        std::size_t size(pds::version_t version = MASTER_VERSION) const;
+        std::size_t size(pds::version_t version = MasterVersion) const;
 
         pds::version_t curr_version() const;
 
-        void print(pds::version_t version = MASTER_VERSION);
+        void print(pds::version_t version = MasterVersion);
 
     private:
         template <typename T>
@@ -39,8 +39,7 @@ namespace pds{
 
 
 template <class OBJ>
-pds::pset<OBJ>::pset() 
-    : root(1), last_version(1), sizes{0, 0} {
+pds::pset<OBJ>::pset() : root(1), last_version(1), sizes{0, 0} {
 }
 
 template <class OBJ>
@@ -53,6 +52,72 @@ template <class OBJ>
 pds::version_t pds::pset<OBJ>::insert(OBJ&& obj){
 
     return insert_impl(std::move(obj));
+}
+
+template <class OBJ>
+template <typename T>
+pds::version_t pds::pset<OBJ>::insert_impl(T&& obj){
+
+    pds::fat_node_tracker<OBJ> tracker(root);
+
+    while(tracker.not_null()){
+
+        if(obj < tracker.obj()){
+
+            tracker = tracker.left();
+        }
+        else if(tracker.obj() < obj){
+
+            tracker = tracker.right();
+        }
+        else{
+            throw pds::ObjectAlreadyExist(
+                "pset::insert: Version " + std::to_string(last_version) + " already contains this object"
+            );
+        }
+    }
+
+    pds::version_t new_version = last_version + 1;
+
+    pds::fat_node_tracker<OBJ> track_master(root);
+
+    while(track_master.not_null_at(MasterVersion)){
+
+        if(obj < track_master.obj_at(MasterVersion)){
+
+            track_master = track_master.left_at(MasterVersion);
+        }
+        else if(track_master.obj_at(MasterVersion) < obj){
+
+            track_master = track_master.right_at(MasterVersion);
+        }
+        else{
+            tracker[new_version] = track_master.at(MasterVersion);
+            break;
+        }
+    }
+
+    if(track_master.null_at(MasterVersion)){
+
+        track_master[MasterVersion] = std::make_shared<pds::fat_node<OBJ>>(std::forward<T>(obj), new_version);
+
+        ++sizes[MasterVersion];
+        tracker[new_version] = track_master.at(MasterVersion);
+    }
+    else{
+        if(tracker.left_not_null()){
+
+            tracker.set_left_at(new_version) = nullptr;
+        }
+        if(tracker.right_not_null()){
+
+            tracker.set_right_at(new_version) = nullptr;
+        }
+    }
+
+    sizes.push_back(sizes[last_version] + 1);
+    
+    return (last_version = new_version);
 }
 
 template <class OBJ>
@@ -103,8 +168,7 @@ pds::version_t pds::pset<OBJ>::remove(const OBJ& obj){
         if(track_to_leaf.left_null()){
 
             to_remove[new_version] = *track_to_leaf;
-            to_remove.set_track_version(new_version);
-            to_remove.set_left(new_version) = tracker.get_left();
+            to_remove.set_left_at(new_version) = tracker.get_left();
         }
         else{
             while(!track_to_leaf.left_null()){
@@ -114,9 +178,8 @@ pds::version_t pds::pset<OBJ>::remove(const OBJ& obj){
             track_to_leaf[new_version] = track_to_leaf.get_right();
 
             to_remove[new_version] = *track_to_leaf;
-            to_remove.set_track_version(new_version);
-            to_remove.set_left(new_version) = tracker.get_left();
-            to_remove.set_right(new_version) = tracker.get_right();
+            to_remove.set_left_at(new_version) = tracker.get_left();
+            to_remove.set_right_at(new_version) = tracker.get_right();
         }
     }
     // push the size of the new version
@@ -128,7 +191,7 @@ pds::version_t pds::pset<OBJ>::remove(const OBJ& obj){
 template <class OBJ>
 bool pds::pset<OBJ>::contains(const OBJ& obj, pds::version_t version) {
 
-    PDS_THROW_IF_VERSION_NOT_EXIST("contains", version, last_version);
+    PDS_THROW_IF_VERSION_NOT_EXIST("pset::contains", version, last_version);
 
     pds::fat_node_tracker<OBJ> tracker(root);
 
@@ -150,7 +213,7 @@ bool pds::pset<OBJ>::contains(const OBJ& obj, pds::version_t version) {
 template <class OBJ>
 std::vector<OBJ> pds::pset<OBJ>::to_vector(const pds::version_t version) {
 
-    PDS_THROW_IF_VERSION_NOT_EXIST("to_vector", version, last_version);
+    PDS_THROW_IF_VERSION_NOT_EXIST("pset::to_vector", version, last_version);
 
     std::vector<OBJ> obj_vec;
 
@@ -195,7 +258,7 @@ pds::version_t pds::pset<OBJ>::curr_version() const {
 template <class OBJ>
 void pds::pset<OBJ>::print(pds::version_t version){
 
-    PDS_THROW_IF_VERSION_NOT_EXIST("print", version, last_version);
+    PDS_THROW_IF_VERSION_NOT_EXIST("pset::print", version, last_version);
 
     std::vector<OBJ> vec = to_vector(version);
 
@@ -205,73 +268,6 @@ void pds::pset<OBJ>::print(pds::version_t version){
         std::cout << vec.back();
     }
     std::cout << "}" << std::endl;
-}
-
-template <class OBJ>
-template <typename T>
-pds::version_t pds::pset<OBJ>::insert_impl(T&& obj){
-
-    pds::fat_node_tracker<OBJ> tracker(root);
-
-    while(tracker.not_null()){
-
-        if(obj < tracker.obj()){
-
-            tracker = tracker.left();
-        }
-        else if(tracker.obj() < obj){
-
-            tracker = tracker.right();
-        }
-        else{
-            throw pds::ObjectAlreadyExist(
-                "Version " + std::to_string(last_version) + " already contains this object"
-            );
-        }
-    }
-
-    sizes.push_back(sizes[last_version] + 1);
-    pds::version_t new_version = last_version + 1;
-
-    pds::fat_node_tracker<OBJ> track_master(root);
-
-    while(track_master.not_null_at(MASTER_VERSION)){
-
-        if(obj < track_master.obj_at(MASTER_VERSION)){
-
-            track_master = track_master.left_at(MASTER_VERSION);
-        }
-        else if(track_master.obj_at(MASTER_VERSION) < obj){
-
-            track_master = track_master.right_at(MASTER_VERSION);
-        }
-        else{
-            tracker[new_version] = track_master.at(MASTER_VERSION);
-            break;
-        }
-    }
-
-    if(track_master.null_at(MASTER_VERSION)){
-
-        track_master[MASTER_VERSION] = std::make_shared<pds::fat_node<OBJ>>(std::forward<T>(obj), new_version);
-
-        ++sizes[MASTER_VERSION];
-        tracker[new_version] = track_master.at(MASTER_VERSION);
-    }
-    else{
-        tracker.set_track_version(new_version);
-
-        if(tracker.left_null() == false){
-
-            tracker.set_left(new_version) = nullptr;
-        }
-        if(tracker.right_null() == false){
-
-            tracker.set_right(new_version) = nullptr;
-        }
-    }
-    
-    return (last_version = new_version);
 }
 
 

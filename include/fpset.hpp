@@ -10,7 +10,7 @@
 #ifndef FULLY_PERSISTENT_SET_HPP
 #define FULLY_PERSISTENT_SET_HPP
 
-#include "internal/fat_node_tracker.hpp"
+#include "internal/fptracker.hpp"
 
 namespace pds{
 
@@ -20,33 +20,6 @@ namespace pds{
     const pds::version_t default_version = std::numeric_limits<pds::version_t>::max();
 
     /**
-     * @anchor MasterVersion
-     * @brief Defines an exceptional version that is intended for internal use.
-     * 
-     * @details 
-     * What is it: Version 0 (to be called 'MasterVersion') is reserve for a unique mission, to save 
-     *  the all T-nodes together. A new T-node will insert first to MasterVersion and then its 'std::shared_ptr' 
-     *  will copied to store it also for its real version.
-     * 
-     * @remarks
-     * Why its good: The uses of groups all T-nodes (@ref T-node VS fat-node) under one version are:
-     * 
-     *      A. It helps to insert or remove in BST time-search by determine if a new T-node 
-     *          is already exist in other version and we can avoid its unnecessary duplicate.
-     * 
-     *      B. Avoiding self loops between versions. 
-     *          For example: {insert(obj=7, v=1), insert(obj=9, v=2), remove(obj=7, v=3), insert(obj=7, v=4)}
-     *          will create the loop [7]<--->[9] between versions 2 and 4.
-     * 
-     *      C. A simple memory managment. Thanks to the fact that we avoiding self loops, we can use 'std::shared_ptr'
-     *          and T-node will free itself when the all fat-nodes who points on it will removes its copy.
-     * 
-     *      D. Finally, for easy insert & remove algorithms.
-     */
-    const pds::version_t master_version = 0;
-
-
-    /**
      * @brief fully persistent set container for sorted UNIQUE objects.
      * 
      * @tparam OBJ The object type. SHOULD SUPPORT operator< and copy constructor.
@@ -54,9 +27,7 @@ namespace pds{
     template <class OBJ>
     class fpset{
 
-        pds::nodes_table<pds::fat_node<OBJ>> root;
-        std::unordered_map<pds::version_t, pds::version_t> version_map;
-        std::set<std::shared_ptr<pds::fat_node<OBJ>>> v_master;
+        pds::fat_node_ptr<OBJ> root;
         pds::version_t last_version;
         std::vector<pds::version_t> sizes;
 
@@ -135,81 +106,314 @@ namespace pds{
          * @note 
          * Time complexity: O(log(size()))
          */
-        pds::version_t remove(const OBJ& obj, pds::version_t version = default_version);
+        // pds::version_t remove(const OBJ& obj, pds::version_t version = default_version);
+
+
+        // pds::version_t remove(OBJ&& obj, pds::version_t version = default_version);
 
 
         /**
          * @brief check if obj in the set.
          * 
          * @param obj the object to query for.
-         * @param v if v=master_version search in all versions. else, search for version v.
+         * @param v if v=MasterVersion search in all versions. else, search for version v.
          *  
          * @return true if 'obj' exists in 'version', false otherwise.
          * 
          * @note 
          * Time complexity: O(log(size()))
          */
-        bool contains(const OBJ& obj, pds::version_t version = master_version);
+        bool contains(const OBJ& obj, pds::version_t version = MasterVersion);
 
 
-        pds::version_t size(pds::version_t version = master_version) const;
+        std::vector<OBJ> to_vector(const pds::version_t version = MasterVersion);
+
+
+        pds::version_t size(pds::version_t version = MasterVersion) const;
 
 
         pds::version_t curr_version() const;
 
 
-        /**
-         * @brief get set of all objects sorted.
-         * 
-         * @param v if v=master_version get all objects from all versions. else, objects of version v.
-         * @return std::set<T> of the objects sorted.
-         * 
-         * @note 
-         * Time complexity: O(size(v))
-         */
-        std::set<OBJ> to_set(const pds::version_t version = master_version) const;
+        void print(pds::version_t version = MasterVersion);
 
     private:
         template <typename T>
         pds::version_t insert_impl(T&& obj, pds::version_t version);
-
-
-        void add_new_version(const OBJ& obj, const pds::version_t old_version){
-
-            const pds::version_t new_version = last_version + 1;
-
-            root.extend_stack({{new_version, old_version}});
-
-            pds::fat_node_tracker<OBJ> tracker(root);
-
-            while(true){
-
-                tracker.copy_map(old_version);
-
-                if(obj < tracker.obj_at(new_version)){
-
-                    tracker = tracker.left_at(new_version);
-                }
-                else if(tracker.obj_at(new_version) < obj){
-
-                    tracker = tracker.right_at(new_version);
-                }
-                else break;
-            }
-        }
-
-
-        /**
-         * INTENDED FOR DEBUGGING PURPOSES ONLY
-         * @brief Ensure that 'version' has the all set objects
-         * 
-         * @param version version for fpset
-         * @param obj_set a set of OBJ elements
-         * @return true if 'version' contain exactly the same objects as obj_set
-         * @return false otherwise
-         */
-        bool equal(const pds::version_t version, std::set<OBJ>&& obj_set) const;
     };
 };
+
+
+template <class OBJ>
+pds::fpset<OBJ>::fpset() : root(1), last_version(1), sizes{0, 0} {
+}
+
+
+template <class OBJ>
+pds::version_t pds::fpset<OBJ>::insert(const OBJ& obj, pds::version_t version){
+
+    return insert_impl(obj, version);
+}
+
+
+template <class OBJ>
+pds::version_t pds::fpset<OBJ>::insert(OBJ&& obj, pds::version_t version){
+
+    return insert_impl(std::move(obj), version);
+}
+
+
+template <class OBJ>
+template <typename T>
+pds::version_t pds::fpset<OBJ>::insert_impl(T&& obj, pds::version_t version){
+
+    if(version == default_version)
+        version = last_version;
+
+    if(version == MasterVersion)
+        throw pds::VersionZeroIllegal("Version 0 is not valid for insert");
+
+    PDS_THROW_IF_VERSION_NOT_EXIST("fpset::insert_impl", version, last_version);
+
+
+    pds::fat_node_tracker<OBJ> tracker(root);
+
+    while(tracker.not_null_at(version)){
+
+        if(obj < tracker.obj_at(version)){
+
+            tracker = tracker.left_at(version);
+        }
+        else if(tracker.obj_at(version) < obj){
+
+            tracker = tracker.right_at(version);
+        }
+        else{
+            throw pds::ObjectAlreadyExist(
+                "fpset::insert: Version " + std::to_string(version) + " already contains this object" 
+            );
+        }
+    }
+
+    pds::version_t new_version = last_version + 1;
+
+    pds::fat_node_tracker<OBJ> track_master(root);
+
+    while(track_master.not_null_at(MasterVersion)){
+
+        if(obj < track_master.obj_at(MasterVersion)){
+
+            track_master = track_master.left_at(MasterVersion);
+        }
+        else if(track_master.obj_at(MasterVersion) < obj){
+
+            track_master = track_master.right_at(MasterVersion);
+        }
+        else{
+            tracker[new_version] = track_master.at(MasterVersion);
+            break;
+        }
+    }
+
+    if(track_master.null_at(MasterVersion)){
+
+        track_master[MasterVersion] = std::make_shared<pds::fat_node<OBJ>>(std::forward<T>(obj), new_version);
+
+        ++sizes[MasterVersion];
+        tracker[new_version] = track_master.at(MasterVersion);
+    }
+    else{
+        if(tracker.left_not_null_at(new_version)){
+
+            tracker.set_left_at(new_version) = nullptr;
+        }
+        if(tracker.right_not_null_at(new_version)){
+
+            tracker.set_right_at(new_version) = nullptr;
+        }
+    }
+
+    // push the size of the new version
+    sizes.push_back(sizes[version] + 1);
+
+    return (last_version = new_version);
+}
+
+
+// template <class OBJ>
+// pds::version_t pds::fpset<OBJ>::remove(const OBJ& obj, pds::version_t version){
+
+// //     if(version == default_version)
+// //         version = last_version;
+
+// //     if(version == 0 || version > last_version)
+// //         throw pds::VersionNotExist(
+// //             "pds::fpset::remove: Version " + std::to_string(version) + " is out of range"
+// //         );
+
+// //     pds::fat_node_tracker<OBJ> tracker(root);
+
+// //     while(tracker.not_null_at(version)){
+
+// //         if(obj < tracker.obj_at(version)){
+
+// //             tracker = tracker.left_at(version);
+// //         }
+// //         else if(tracker.obj_at(version) < obj){
+
+// //             tracker = tracker.right_at(version);
+// //         }
+// //         else break;
+
+// //         tracker.copy_map(version);
+// //     }
+
+// //     if(tracker.null_at(version))
+// //         throw pds::ObjectNotExist(
+// //             "pds::fpset::remove: Attempting to remove an object from Version "
+// //             + std::to_string(version) + ". But the object is not exists for this Version" 
+// //         );
+
+    
+// //     pds::fat_node_tracker<OBJ> to_remove = tracker;
+// //     pds::version_t new_version = last_version + 1;
+
+// //     if(to_remove.left_at(version).null_at(version)){
+
+// //         to_remove[new_version] = to_remove.ref_right_at(version);
+// //     }
+// //     else if(to_remove.right_at(version).null_at(version)){
+
+// //         to_remove[new_version] = to_remove.ref_left_at(version);
+// //     }
+// //     else{
+
+// // /***************  ILLUSTRATION  **************************
+
+// //           +++ version +++    |   +++ new_version +++
+// //                              |
+// //       to_remove:[6]          |           [9]
+/*                /   \        ==>>        /   \
+// //             [4]     [16]     |       [4]     [16]
+// //                    /         |              /
+// //                [11]          |          [11]
+// //               /              |
+// //            [9]               |
+ */
+// /***********************************************************/
+
+// //         tracker = to_remove.right_at(version);
+
+// //         while(tracker.left_at(version).not_null_at(version)){
+
+// //             tracker[new_version] = tracker.at(version);
+// //             tracker = tracker.left_at(version);
+// //         }
+// //         tracker[new_version] = nullptr;
+
+// //         to_remove[new_version] = tracker.at(version);
+// //     }
+
+// //     add_new_version(tracker.obj_at(new_version), version);
+
+// //     // push the size of the new version
+// //     sizes.push_back(sizes[version] - 1);
+
+//     return (last_version = new_version);
+// }
+
+
+// template <class OBJ>
+// pds::version_t pds::fpset<OBJ>::remove(OBJ&& obj, pds::version_t version){
+
+//     return remove(std::as_const(obj), version);
+// }
+
+
+template <class OBJ>
+bool pds::fpset<OBJ>::contains(const OBJ& obj, pds::version_t version){
+
+    PDS_THROW_IF_VERSION_NOT_EXIST("fpset::contains", version, last_version);
+
+    pds::fat_node_tracker<OBJ> tracker(root);
+
+    while(tracker.not_null_at(version)){
+
+        if(obj < tracker.obj_at(version)){
+
+            tracker = tracker.left_at(version);
+        }
+        else if(tracker.obj_at(version) < obj){
+
+            tracker = tracker.right_at(version);
+        }
+        else return true;
+    }
+    return false;
+}
+
+
+template <class OBJ>
+std::vector<OBJ> pds::fpset<OBJ>::to_vector(const pds::version_t version) {
+
+    PDS_THROW_IF_VERSION_NOT_EXIST("fpset::to_vector", version, last_version);
+
+    std::vector<OBJ> obj_vec;
+
+    /*** Inorder Stack Traversal ***/
+    std::stack<pds::fat_node_tracker<OBJ>> trav_stack;
+    pds::fat_node_tracker<OBJ> tracker(root);
+
+    while(tracker.not_null_at(version) || !trav_stack.empty()){
+
+        while(tracker.not_null_at(version)){
+
+            trav_stack.push(tracker);
+            tracker = tracker.left_at(version);
+        }
+        tracker = trav_stack.top();
+        trav_stack.pop();
+
+        obj_vec.push_back(tracker.obj_at(version));
+        tracker = tracker.right_at(version);
+    }
+    return obj_vec;
+}
+
+
+template <class OBJ>
+pds::version_t pds::fpset<OBJ>::size(pds::version_t version) const {
+
+    try{
+        return sizes.at(version);
+    }
+    catch(const std::out_of_range&){
+
+        return 0;
+    }
+}
+
+
+template <class OBJ>
+pds::version_t pds::fpset<OBJ>::curr_version() const {
+
+    return last_version;
+}
+
+
+template <class OBJ>
+void pds::fpset<OBJ>::print(pds::version_t version){
+
+    PDS_THROW_IF_VERSION_NOT_EXIST("pset::print", version, last_version);
+
+    std::vector<OBJ> vec = to_vector(version);
+
+    std::cout << "Version " << version << ": {";
+    if(!vec.empty()){
+        std::copy(vec.begin(), vec.end() - 1, std::ostream_iterator<OBJ>(std::cout, ", "));
+        std::cout << vec.back();
+    }
+    std::cout << "}" << std::endl;
+}
 
 #endif /* FULLY_PERSISTENT_SET_HPP */

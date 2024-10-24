@@ -2,7 +2,7 @@
 #define PERSISTENT_DATA_STRUCTURE_TEST_HPP
 
 #include "internal/fat_node.hpp"
-#include "internal/fat_node_tracker.hpp"
+#include "internal/fptracker.hpp"
 #include "fpset.hpp"
 
 #define PDS_TESTS_NUM 3
