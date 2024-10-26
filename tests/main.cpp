@@ -1,6 +1,5 @@
 #include "pds_test.h"
 
-
 int main(int argc, char* argv[]){
 
     bool run_all = (argc < 2) || std::strcmp(argv[1], "all") == 0;
@@ -24,5 +23,6 @@ int main(int argc, char* argv[]){
             }
         }
     }
+    std::cout << "ALL TESTS PASSED!!!" << std::endl;
     return 0;
 }

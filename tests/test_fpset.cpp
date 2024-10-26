@@ -1,28 +1,28 @@
-#include "pds_test.h"
+#include "fpSet.hpp"
 
 using namespace pds;
 using namespace std;
 
 #define PDS_RAND_ARR_SIZE 1000
 
-void test_basic();
-void test_readme_example();
-void test_insert();
-void test_insert_to_2_or_3();
-void test_remove();
-void test_contains();
-void test_to_vector();
+void test_fpSet_basic();
+void test_fpSet_readme_example();
+void test_fpSet_insert();
+void test_fpSet_insert_to_2_or_3();
+void test_fpSet_remove();
+void test_fpSet_contains();
+void test_fpSet_to_vector();
 
 void test_fpSet(){
 
     try{
-        test_basic();
-        test_readme_example();
-        test_insert();
-        test_insert_to_2_or_3();
-        test_remove();
-        test_contains();
-        test_to_vector();
+        test_fpSet_basic();
+        test_fpSet_readme_example();
+        test_fpSet_insert();
+        test_fpSet_insert_to_2_or_3();
+        test_fpSet_remove();
+        test_fpSet_contains();
+        test_fpSet_to_vector();
     }
     catch(const pdsExcept& e){
 
@@ -32,11 +32,11 @@ void test_fpSet(){
 
         throw pdsExcept("test_fpSet: std::Exception: " + string(e.what()));
     }
-    cout << "ALL fpSet tests PASSED!!" << endl << endl;
+    cout << "ALL fpSet tests PASSED!!" << endl;
 }
 
 
-void test_basic(){
+void test_fpSet_basic(){
 
     vector<string> objs = {"a", "b", "c", "d"};
     vector<vector<string>> versions = {{"a"}, 
@@ -98,11 +98,11 @@ void test_basic(){
         assert(fps.contains(new_versions[i][1], curr_v) == false);
     }
 
-    cout << "fpSet::test_basic PASSED!" << endl;
+    cout << "fpSet::test_fpSet_basic PASSED!" << endl;
 }
 
 
-void test_readme_example() {
+void test_fpSet_readme_example() {
 
     fpSet<string> my_fpSet; // Create a new fpSet with first version
     // Version 1: {}
@@ -148,11 +148,11 @@ void test_readme_example() {
     assert(my_fpSet.to_vector(4) == vector<string>({"a", "c"})); 
     assert(my_fpSet.to_vector() == vector<string>({"a", "b", "c"})); // All elements
 
-    cout << "fpSet::test_readme_example PASSED!" << endl;
+    cout << "fpSet::test_fpSet_readme_example PASSED!" << endl;
 }
 
 
-void test_insert(){
+void test_fpSet_insert(){
 
     /*** preperation for the pset tests ***/
 
@@ -215,11 +215,11 @@ void test_insert(){
     sort(objs.begin(), objs.end());
     assert(fps.to_vector() == objs);
 
-    cout << "fpSet::test_insert PASSED!" << endl;
+    cout << "fpSet::test_fpSet_insert PASSED!" << endl;
 }
 
 
-void test_insert_to_2_or_3(){
+void test_fpSet_insert_to_2_or_3(){
 
     /*** preperation for the pset tests ***/
 
@@ -268,23 +268,23 @@ void test_insert_to_2_or_3(){
     sort(objs.begin(), objs.end());
     assert(fps.to_vector() == objs);
 
-    cout << "fpSet::test_insert_to_2_or_3 PASSED!" << endl;
+    cout << "fpSet::test_fpSet_insert_to_2_or_3 PASSED!" << endl;
 }
 
 
-void test_remove(){
+void test_fpSet_remove(){
 
     // TODO
 }
 
 
-void test_contains(){
+void test_fpSet_contains(){
 
     // TODO
 }
 
 
-void test_to_vector(){
+void test_fpSet_to_vector(){
 
     // TODO
 }

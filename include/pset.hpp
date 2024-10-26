@@ -105,13 +105,15 @@ pds::version_t pds::pSet<OBJ>::insert_impl(T&& obj){
         tracker[new_version] = track_master.at(MasterVersion);
     }
     else{
-        if(tracker.left_not_null()){
+        tracker.set_track_version(new_version);
 
-            tracker.set_left_at(new_version) = nullptr;
+        if(tracker.left_null() == false){
+
+            tracker.set_left(new_version) = nullptr;
         }
-        if(tracker.right_not_null()){
+        if(tracker.right_null() == false){
 
-            tracker.set_right_at(new_version) = nullptr;
+            tracker.set_right(new_version) = nullptr;
         }
     }
 
@@ -146,11 +148,13 @@ pds::version_t pds::pSet<OBJ>::remove(const OBJ& obj){
 
     if(tracker.null())
         throw pds::ObjectNotExist(
-            "pds::pSet::remove: Attempting to remove an object but the object is not exists" 
+            "pds::pset::remove: Attempting to remove an object but the object is not exists" 
         );
 
     pds::version_t new_version = last_version + 1;
+
     pds::pSetTracker<OBJ> to_remove = tracker;
+    pds::pSetTracker<OBJ> track_to_leaf = tracker;
 
     if(to_remove.left_null()){
 
@@ -161,13 +165,13 @@ pds::version_t pds::pSet<OBJ>::remove(const OBJ& obj){
         to_remove[new_version] = tracker.get_left();
     }
     else{
-        pds::pSetTracker<OBJ> track_to_leaf = tracker;
         track_to_leaf = track_to_leaf.right();
 
         if(track_to_leaf.left_null()){
 
             to_remove[new_version] = *track_to_leaf;
-            to_remove.set_left_at(new_version) = tracker.get_left();
+            to_remove.set_track_version(new_version);
+            to_remove.set_left(new_version) = tracker.get_left();
         }
         else{
             while(!track_to_leaf.left_null()){
@@ -177,8 +181,9 @@ pds::version_t pds::pSet<OBJ>::remove(const OBJ& obj){
             track_to_leaf[new_version] = track_to_leaf.get_right();
 
             to_remove[new_version] = *track_to_leaf;
-            to_remove.set_left_at(new_version) = tracker.get_left();
-            to_remove.set_right_at(new_version) = tracker.get_right();
+            to_remove.set_track_version(new_version);
+            to_remove.set_left(new_version) = tracker.get_left();
+            to_remove.set_right(new_version) = tracker.get_right();
         }
     }
     // push the size of the new version

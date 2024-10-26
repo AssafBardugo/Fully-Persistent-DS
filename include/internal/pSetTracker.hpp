@@ -41,6 +41,8 @@ namespace pds{
 
         std::shared_ptr<pFatNode<OBJ>>& set_left(const pds::version_t new_version);
         std::shared_ptr<pFatNode<OBJ>>& set_right(const pds::version_t new_version);
+
+        void set_track_version(const pds::version_t new_version);
     };
 };
 
@@ -357,6 +359,14 @@ std::shared_ptr<pds::pFatNode<OBJ>>& pds::pSetTracker<OBJ>::set_right(const pds:
             "pSetTracker::set_right: Version " + std::to_string(track_version) + " is not exist"
         );
     }
+}
+
+template <class OBJ>
+void pds::pSetTracker<OBJ>::set_track_version(const pds::version_t new_version){
+
+    PDS_THROW_IF_NULL_TRACKER("set_track_version", new_version);
+
+    track_version = new_version;
 }
 
 #endif /* PERSISTENT_SET_TRACKER_HPP */

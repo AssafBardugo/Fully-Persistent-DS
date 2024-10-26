@@ -1,4 +1,4 @@
-#include "pds_test.h"
+#include "pSet.hpp"
 
 using namespace pds;
 using namespace std;
@@ -8,30 +8,30 @@ using namespace std;
 
 const bool print_full_test = false;
 
-void test_basic();
-void test_insert();
-void test_remove();
-void test_insert_removed_objects();
-void test_contains();
-void test_size_and_to_vector();
-void test_exceptions();
-void test_edge_case_1();
-void test_edge_case_2();
-void test_print();
+void test_pSet_basic();
+void test_pSet_insert();
+void test_pSet_remove();
+void test_pSet_insert_removed_objects();
+void test_pSet_contains();
+void test_pSet_size_and_to_vector();
+void test_pSet_exceptions();
+void test_pSet_edge_case_1();
+void test_pSet_edge_case_2();
+void test_pSet_print();
 
 void test_pSet(){
 
     try{
-        test_basic();
-        test_insert();
-        test_remove();
-        test_insert_removed_objects();
-        test_contains();
-        test_size_and_to_vector();
-        test_exceptions();
-        test_edge_case_1();
-        test_edge_case_2();
-        test_print();
+        test_pSet_basic();
+        test_pSet_insert();
+        test_pSet_remove();
+        test_pSet_insert_removed_objects();
+        test_pSet_contains();
+        test_pSet_size_and_to_vector();
+        test_pSet_exceptions();
+        test_pSet_edge_case_1();
+        test_pSet_edge_case_2();
+        test_pSet_print();
     }
     catch(const pdsExcept& e){
 
@@ -41,11 +41,11 @@ void test_pSet(){
 
         throw pdsExcept("test_pSet: std::Exception: " + string(e.what()));
     }
-    cout << "ALL pSet tests PASSED!!" << endl << endl;
+    cout << "ALL pSet tests PASSED!!" << endl;
 }
 
 
-void test_basic(){
+void test_pSet_basic(){
 
     vector<string> objs = {"a", "b", "c"};
     pSet<string> ps;
@@ -90,11 +90,11 @@ void test_basic(){
     assert(ps.size() == 3);
     assert(ps.to_vector() == objs);
 
-    cout << "pSet::test_basic PASSED!" << endl;
+    cout << "pSet::test_pSet_basic PASSED!" << endl;
 }
 
 
-void test_insert(){
+void test_pSet_insert(){
 
     /*** preperation for the pSet tests ***/
     srand(time(NULL));
@@ -139,11 +139,11 @@ void test_insert(){
     vector<int> ps_vec_all = ps.to_vector(); // master version
     assert(ps_vec_all == versions[PDS_RAND_ARR_SIZE - 1]);
 
-    cout << "pSet::test_insert PASSED!" << endl;
+    cout << "pSet::test_pSet_insert PASSED!" << endl;
 }
 
 
-void test_remove(){
+void test_pSet_remove(){
 
     /*** preperation for the pSet tests ***/
     srand(time(NULL));
@@ -209,11 +209,11 @@ void test_remove(){
     ps_vec = ps.to_vector(); // take all from master_version
     assert(ps_vec == all_objs);
 
-    cout << "pSet::test_remove PASSED!" << endl;
+    cout << "pSet::test_pSet_remove PASSED!" << endl;
 }
 
 
-void test_insert_removed_objects(){
+void test_pSet_insert_removed_objects(){
 
     /*** preperation for the pSet tests ***/
     vector<int> objs(PDS_CONTAINS_SIZE);
@@ -249,11 +249,11 @@ void test_insert_removed_objects(){
 
     assert(ps.size() == PDS_CONTAINS_SIZE);
 
-    cout << "pSet::test_insert_removed_objects PASSED!" << endl;
+    cout << "pSet::test_pSet_insert_removed_objects PASSED!" << endl;
 }
 
 
-void test_contains(){
+void test_pSet_contains(){
 
     /*** preperation for the pSet tests ***/
     srand(time(NULL));
@@ -309,11 +309,11 @@ void test_contains(){
     }
     assert(ps.size(last_version) == 0);
 
-    cout << "pSet::test_contains PASSED!" << endl;
+    cout << "pSet::test_pSet_contains PASSED!" << endl;
 }
 
 
-void test_size_and_to_vector(){
+void test_pSet_size_and_to_vector(){
 
     /*** preperation for the test ***/
 
@@ -395,18 +395,18 @@ void test_size_and_to_vector(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    cout << "pSet::test_size_and_to_vector PASSED!" << endl;
+    cout << "pSet::test_pSet_size_and_to_vector PASSED!" << endl;
 }
 
 
-void test_exceptions(){
+void test_pSet_exceptions(){
 
     // TODO
-    cout << "pSet::test_exceptions PASSED!" << endl;
+    cout << "pSet::test_pSet_exceptions PASSED!" << endl;
 }
 
 
-void test_edge_case_1(){
+void test_pSet_edge_case_1(){
 
     // try to insert and remove one object again and again
 
@@ -433,11 +433,11 @@ void test_edge_case_1(){
         }
     }
 
-    cout << "pSet::test_edge_case_1 PASSED!" << endl;
+    cout << "pSet::test_pSet_edge_case_1 PASSED!" << endl;
 }
 
 
-void test_edge_case_2(){
+void test_pSet_edge_case_2(){
 
     // Try inserting and removing a growing series of objects. 
     // It should check if something went wrong when we reinserted the same objects.
@@ -502,11 +502,11 @@ void test_edge_case_2(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    cout << "pSet::test_edge_case_2 PASSED!" << endl;
+    cout << "pSet::test_pSet_edge_case_2 PASSED!" << endl;
 }
 
 
-void test_print(){
+void test_pSet_print(){
 
     if(!print_full_test)
         return;
