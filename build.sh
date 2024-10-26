@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p build
+
 # Defaults:
 action="all"
 memcheck="false"
@@ -33,7 +35,6 @@ do
 done
 
 make clean
-echo "Building tests..."
 make test
 
 # Run the chosen action
@@ -41,6 +42,5 @@ if [ "$memcheck" == "true" ]; then
     echo "Running Valgrind on selected tests..."
     valgrind --leak-check=full --error-exitcode=1 ./test $action || exit 1
 else
-    echo "Running selected tests..."
     ./test $action
 fi

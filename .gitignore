@@ -1,0 +1,8 @@
+.vscode
+build
+include/in-develop
+desktop.ini
+.eraserdiagram
+
+*.o
+*.exe
