@@ -1,67 +1,57 @@
 #ifndef PERSISTENT_DATA_STRUCTURE_UNION_FIND_HPP
 #define PERSISTENT_DATA_STRUCTURE_UNION_FIND_HPP
 
-#include "FatNode.hpp"
+#include "Utils.hpp"
 
-class UnionFind{
+namespace pds{
 
-    std::unordered_map<pds::version_t, pds::version_t> parent;  // Maps each version to its parent
-    std::unordered_map<pds::version_t, pds::version_t> rank;    // Maps each version to its rank
+    class UnionFind{
 
-public:
-    // Adds a new element to the Union-Find structure, if it's not already present.
-    void add(pds::version_t version){
+        std::unordered_map<pds::version_t, pds::version_t> parent;
+        std::unordered_map<pds::version_t, pds::version_t> size;
 
-        if(parent.find(version) == parent.end()){
+    public:
+        pds::version_t Find(pds::version_t version){
 
-            parent[version] = version;  // Each element is initially its own parent (root)
-            rank[version] = 0;      // Rank is initially 0
+            if(parent.find(version) == parent.end()) 
+                throw pds::VersionNotExist(
+                    "UnionFind::Find: Version " + std::to_string(version) + " has no parent"
+                );
+
+            if(parent[version] != version){
+
+                parent[version] = Find(parent[version]);
+            }
+            return parent[version];
         }
-    }
 
-    // Finds the representative (root) of the set containing 'version', with path compression.
-    pds::version_t Find(pds::version_t version){
+        void Union(pds::version_t version1, pds::version_t version2){
 
-        if(parent.find(version) == parent.end()) 
-            return version; // If version is not present
+            pds::version_t root1 = Find(version1);
+            pds::version_t root2 = Find(version2);
 
-        if(parent[version] != version){
+            if(root1 != root2){
 
-            parent[version] = Find(parent[version]); // Path compression
-        }
-        return parent[version];
-    }
+                if(size[root1] <= size[root2]){
 
-    // unites the sets containing 'version1' and 'version2'.
-    void Union(pds::version_t version1, pds::version_t version2){
-
-        add(version1);
-        add(version2);
-        pds::version_t root1 = Find(version1);
-        pds::version_t root2 = Find(version2);
-
-        if(root1 != root2){
-            // Union by rank
-            if(rank[root1] > rank[root2]){
-
-                parent[root2] = root1;
-            } 
-            else if(rank[root1] < rank[root2]){
-
-                parent[root1] = root2;
-            } 
-            else{
-                parent[root2] = root1;
-                rank[root1]++;
+                    parent[root1] = root2;
+                    size[root2] += size[root1];
+                }
+                else{
+                    // We shouldn't get here since size[root1] is always 1 in our fpSetTracker
+                    assert(false); 
+                    parent[root2] = root1;
+                    size[root1] += size[root2];
+                }
             }
         }
-    }
 
-    // Check if two elements are in the same set
-    bool connected(pds::version_t version1, pds::version_t version2){
+        void add(pds::version_t version){
 
-        return Find(version1) == Find(version2);
-    }
+            parent[version] = version;
+            size[version] = 1;
+        }
+    };
 };
 
 #endif /* PERSISTENT_DATA_STRUCTURE_UNION_FIND_HPP */

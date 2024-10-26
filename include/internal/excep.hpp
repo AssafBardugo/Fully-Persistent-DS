@@ -1,7 +1,7 @@
 #ifndef PERSISTENT_DATA_STRUCTURE_EXCEPTIONS_HPP
 #define PERSISTENT_DATA_STRUCTURE_EXCEPTIONS_HPP
 
-#include "utils.hpp"
+#include "Utils.hpp"
 
 namespace pds{
 
@@ -22,16 +22,18 @@ namespace pds{
     class VersionNotExist : public pdsExcept {
         /*
             thrown by:
-                - pds::fpset::insert_impl
-                - pds::fpset::remove
-                - pds::fpset::contains
-                - pds::fpset::to_vector
+                - pds::fpSet::insert_impl
+                - pds::fpSet::remove
+                - pds::fpSet::contains
+                - pds::fpSet::to_vector
+                - pds::fpSet::print
 
-                - pds::pset::contains
-                - pds::pset::to_vector
-                - pds::pset::print
+                - pds::pSet::contains
+                - pds::pSet::to_vector
+                - pds::pSet::print
                 
                 - pds::fat_node_tracker - almost all func
+                - pds::UnionFind::Find
         */
     public:
         VersionNotExist(std::string&& m) : pdsExcept(std::move(m)){}
@@ -40,7 +42,8 @@ namespace pds{
     class VersionZeroIllegal : public pdsExcept{
         /*
             thrown by:
-                - pds::fpset::insert_impl
+                - pds::fpSet::insert_impl
+                - pds::fpSet::remove
         */
     public:
         VersionZeroIllegal(std::string&& m) : pdsExcept(std::move(m)){}
@@ -49,8 +52,8 @@ namespace pds{
     class ObjectAlreadyExist : public pdsExcept{
         /*
             thrown by:
-                - pds::pset::insert_impl
-                - pds::fpset::insert_impl
+                - pds::pSet::insert_impl
+                - pds::fpSet::insert_impl
         */
     public:
         ObjectAlreadyExist(std::string&& m) : pdsExcept(std::move(m)){}
@@ -59,7 +62,8 @@ namespace pds{
     class ObjectNotExist : public pdsExcept{
         /*
             thrown by:
-                - pds::pset::remove
+                - pds::pSet::remove
+                - pds::fpSet::remove
         */
     public:
         ObjectNotExist(std::string&& m) : pdsExcept(std::move(m)){}

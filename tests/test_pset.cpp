@@ -1,4 +1,4 @@
-#include "pset.hpp"
+#include "pds_test.h"
 
 using namespace pds;
 using namespace std;
@@ -19,7 +19,7 @@ void test_edge_case_1();
 void test_edge_case_2();
 void test_print();
 
-void test_pset(){
+void test_pSet(){
 
     try{
         test_basic();
@@ -34,21 +34,21 @@ void test_pset(){
         test_print();
     }
     catch(const pdsExcept& e){
-        cout << "pdsExcept: " << e.what() << endl;
-        exit(1);
+
+        throw pdsExcept("test_pSet: pdsExcept: " + string(e.what()));
     }
     catch(const exception& e){
-        cout << "Exception: " << e.what() << endl;
-        exit(1);
+
+        throw pdsExcept("test_pSet: std::Exception: " + string(e.what()));
     }
-    cout << "ALL pset tests PASSED!!" << endl;
+    cout << "ALL pSet tests PASSED!!" << endl << endl;
 }
 
 
 void test_basic(){
 
     vector<string> objs = {"a", "b", "c"};
-    pset<string> ps;
+    pSet<string> ps;
 
     version_t v1 = ps.insert(objs[0]);
     assert(v1 == 2);
@@ -90,13 +90,13 @@ void test_basic(){
     assert(ps.size() == 3);
     assert(ps.to_vector() == objs);
 
-    cout << "test_basic PASSED!" << endl;
+    cout << "pSet::test_basic PASSED!" << endl;
 }
 
 
 void test_insert(){
 
-    /*** preperation for the pset tests ***/
+    /*** preperation for the pSet tests ***/
     srand(time(NULL));
 
     // generate unique objects:
@@ -124,7 +124,7 @@ void test_insert(){
     /*** ***/
 
 
-    pset<int> ps;
+    pSet<int> ps;
     for(size_t v = 2; v < PDS_RAND_ARR_SIZE; ++v){ 
 
         assert(ps.insert(objs[v]) == v);
@@ -139,13 +139,13 @@ void test_insert(){
     vector<int> ps_vec_all = ps.to_vector(); // master version
     assert(ps_vec_all == versions[PDS_RAND_ARR_SIZE - 1]);
 
-    cout << "test_insert PASSED!" << endl;
+    cout << "pSet::test_insert PASSED!" << endl;
 }
 
 
 void test_remove(){
 
-    /*** preperation for the pset tests ***/
+    /*** preperation for the pSet tests ***/
     srand(time(NULL));
 
     // generate unique objects:
@@ -171,7 +171,7 @@ void test_remove(){
     /*** ***/
 
 
-    pset<int> ps;
+    pSet<int> ps;
     for(size_t v = 2; v < PDS_RAND_ARR_SIZE; ++v){ 
 
         assert(ps.insert(objs[v]) == v);
@@ -209,13 +209,13 @@ void test_remove(){
     ps_vec = ps.to_vector(); // take all from master_version
     assert(ps_vec == all_objs);
 
-    cout << "test_remove PASSED!" << endl;
+    cout << "pSet::test_remove PASSED!" << endl;
 }
 
 
 void test_insert_removed_objects(){
 
-    /*** preperation for the pset tests ***/
+    /*** preperation for the pSet tests ***/
     vector<int> objs(PDS_CONTAINS_SIZE);
     srand(time(NULL));
 
@@ -225,7 +225,7 @@ void test_insert_removed_objects(){
     }
     /*** ***/
 
-    pset<int> ps;
+    pSet<int> ps;
     version_t curr_v = 1;
 
     for(int k = 0; k < 4; ++k){
@@ -249,13 +249,13 @@ void test_insert_removed_objects(){
 
     assert(ps.size() == PDS_CONTAINS_SIZE);
 
-    cout << "test_insert_removed_objects PASSED!" << endl;
+    cout << "pSet::test_insert_removed_objects PASSED!" << endl;
 }
 
 
 void test_contains(){
 
-    /*** preperation for the pset tests ***/
+    /*** preperation for the pSet tests ***/
     srand(time(NULL));
 
     // generate unique objects:
@@ -267,7 +267,7 @@ void test_contains(){
     }
     /*** ***/
 
-    pset<int> ps;
+    pSet<int> ps;
     for(size_t v = 2; v < PDS_CONTAINS_SIZE; ++v){ 
 
         assert(ps.insert(objs[v]) == v);
@@ -309,7 +309,7 @@ void test_contains(){
     }
     assert(ps.size(last_version) == 0);
 
-    cout << "test_contains PASSED!" << endl;
+    cout << "pSet::test_contains PASSED!" << endl;
 }
 
 
@@ -368,7 +368,7 @@ void test_size_and_to_vector(){
     /*** end preperation for the test ***/
 
 
-    pset<int> ps;
+    pSet<int> ps;
     version_t ps_v = 1;
     size_t ps_size = 0;
 
@@ -395,14 +395,14 @@ void test_size_and_to_vector(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    cout << "test_size_and_to_vector PASSED!" << endl;
+    cout << "pSet::test_size_and_to_vector PASSED!" << endl;
 }
 
 
 void test_exceptions(){
 
     // TODO
-    cout << "test_exceptions PASSED!" << endl;
+    cout << "pSet::test_exceptions PASSED!" << endl;
 }
 
 
@@ -412,7 +412,7 @@ void test_edge_case_1(){
 
     const int ROUNDS = 20;
 
-    pset<int> ps;
+    pSet<int> ps;
     ps.insert(0);
     vector<int> vec_with_1 = {0, 1};
     vector<int> vec_without_1 = {0};
@@ -433,7 +433,7 @@ void test_edge_case_1(){
         }
     }
 
-    cout << "test_edge_case_1 PASSED!" << endl;
+    cout << "pSet::test_edge_case_1 PASSED!" << endl;
 }
 
 
@@ -479,7 +479,7 @@ void test_edge_case_2(){
         {}
     };
 
-    pset<string> ps;
+    pSet<string> ps;
     size_t curr_v = 1;
 
     for(size_t i = 0; i < objs.size(); ++i){
@@ -502,7 +502,7 @@ void test_edge_case_2(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    cout << "test_edge_case_2 PASSED!" << endl;
+    cout << "pSet::test_edge_case_2 PASSED!" << endl;
 }
 
 
@@ -515,7 +515,7 @@ void test_print(){
                         15, 26, 16, 27, 28, 5, 10, 29, 6, 
                         30, 1, 31, 2, 32, 4, 33, 19, 34};
 
-    pset<int> ps;
+    pSet<int> ps;
     ps.print(1);
     for(size_t i = 0; i < objs.size(); ++i){ 
 

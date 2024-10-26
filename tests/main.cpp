@@ -1,4 +1,4 @@
-#include "pds_test.hpp"
+#include "pds_test.h"
 
 
 int main(int argc, char* argv[]){
@@ -14,12 +14,7 @@ int main(int argc, char* argv[]){
             }
             catch(const pds::pdsExcept& e){
 
-                std::cout << std::endl << "pdsExcept: " << std::string(e.what());
-                exit(1);
-            }
-            catch(const std::exception& e){
-
-                std::cout << std::endl << "std::exception: " << std::string(e.what());
+                std::cout << e.what() << std::endl;
                 exit(1);
             }
             catch(...){
@@ -29,6 +24,5 @@ int main(int argc, char* argv[]){
             }
         }
     }
-
     return 0;
 }

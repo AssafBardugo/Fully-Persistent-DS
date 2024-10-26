@@ -1,7 +1,6 @@
 .vscode
 build
 include/in-develop
-tests/catch2
 desktop.ini
 
 *.o
