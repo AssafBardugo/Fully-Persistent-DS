@@ -23,6 +23,6 @@ int main(int argc, char* argv[]){
             }
         }
     }
-    std::cout << "ALL TESTS PASSED!!!" << std::endl;
+    std::cout << "ALL TESTS " << PRINT_GREEN("PASSED!") << std::endl;
     return 0;
 }

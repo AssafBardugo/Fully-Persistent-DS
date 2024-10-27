@@ -7,11 +7,11 @@ namespace pds{
 
     class UnionFind{
 
-        std::unordered_map<pds::version_t, pds::version_t> parent;
-        std::unordered_map<pds::version_t, pds::version_t> size;
+        std::unordered_map<std::size_t, std::size_t> parent;
+        std::unordered_map<std::size_t, std::size_t> size;
 
     public:
-        pds::version_t Find(pds::version_t version){
+        std::size_t Find(std::size_t version){
 
             if(parent.find(version) == parent.end()) 
                 throw pds::VersionNotExist(
@@ -25,10 +25,10 @@ namespace pds{
             return parent[version];
         }
 
-        void Union(pds::version_t version1, pds::version_t version2){
+        void Union(std::size_t version1, std::size_t version2){
 
-            pds::version_t root1 = Find(version1);
-            pds::version_t root2 = Find(version2);
+            std::size_t root1 = Find(version1);
+            std::size_t root2 = Find(version2);
 
             if(root1 != root2){
 
@@ -46,7 +46,7 @@ namespace pds{
             }
         }
 
-        void add(pds::version_t version){
+        void add(std::size_t version){
 
             parent[version] = version;
             size[version] = 1;
