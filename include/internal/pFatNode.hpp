@@ -2,7 +2,6 @@
 #define PERSISTENT_pFatNode_HPP
 
 #include "Utils.hpp"
-#include "Excep.hpp"
 
 namespace pds{
 

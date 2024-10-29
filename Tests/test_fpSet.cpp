@@ -32,7 +32,7 @@ void test_fpSet(){
 
         throw pdsExcept("test_fpSet: std::Exception: " + string(e.what()));
     }
-    cout << "ALL fpSet tests PASSED!!" << endl;
+    cout << "ALL fpSet tests " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -98,7 +98,7 @@ void test_fpSet_basic(){
         assert(fps.contains(new_versions[i][1], curr_v) == false);
     }
 
-    cout << "fpSet::test_fpSet_basic PASSED!" << endl;
+    cout << "fpSet::test_fpSet_basic " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -148,7 +148,7 @@ void test_fpSet_readme_example() {
     assert(my_fpSet.to_vector(4) == vector<string>({"a", "c"})); 
     assert(my_fpSet.to_vector() == vector<string>({"a", "b", "c"})); // All elements
 
-    cout << "fpSet::test_fpSet_readme_example PASSED!" << endl;
+    cout << "fpSet::test_fpSet_readme_example " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -215,7 +215,7 @@ void test_fpSet_insert(){
     sort(objs.begin(), objs.end());
     assert(fps.to_vector() == objs);
 
-    cout << "fpSet::test_fpSet_insert PASSED!" << endl;
+    cout << "fpSet::test_fpSet_insert " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -268,7 +268,7 @@ void test_fpSet_insert_to_2_or_3(){
     sort(objs.begin(), objs.end());
     assert(fps.to_vector() == objs);
 
-    cout << "fpSet::test_fpSet_insert_to_2_or_3 PASSED!" << endl;
+    cout << "fpSet::test_fpSet_insert_to_2_or_3 " << PRINT_GREEN("PASSED") << endl;
 }
 
 

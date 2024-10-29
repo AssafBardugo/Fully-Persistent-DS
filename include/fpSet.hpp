@@ -14,58 +14,92 @@
 
 namespace pds{
 
-    /**
-     * @brief default_version uses to be 'last_version' in insert & remove.
-     */
+    /// @brief Default version indicating the 'last_version' for insert & remove operations.
     const pds::version_t default_version = std::numeric_limits<pds::version_t>::max();
 
+
     /**
-     * @brief fully persistent set container for sorted UNIQUE objects.
+     * @class fpSet
+     * @brief Fully persistent set container for sorted, unique objects.
      * 
-     * @tparam OBJ The object type. SHOULD SUPPORT operator< and copy constructor.
+     * The fpSet class allows storing objects in a way that maintains historical versions
+     * of the set after each modification. Each version is preserved, enabling access to any 
+     * past state of the set.
+     * 
+     * @tparam OBJ The object type, which must support `operator<` for sorting and provide
+     *             either copy or move constructors.
+     * 
+     * @note Space Complexity: O(N log(N))
+     *       - N represents the number of versions maintained (i.e., `last_version`).
+     *       - Every object is saved only once, regardless of how many versions it exists in.
+     * 
+     * @example
+     * ```
+     * pds::fpSet<int> vrsSet;
+     * vrsSet.insert(5);
+     * vrsSet.insert(10);
+     * vrsSet.remove(5);
+     * // Access previous version states
+     * ```
      */
     template <class OBJ>
     class fpSet{
 
-        pds::fpFatNodePtr<OBJ> root;
-        pds::version_t last_version;
-        std::vector<pds::version_t> sizes;
+        pds::fpFatNodePtr<OBJ> root;    ///< root of a BST that stores the data.
+        pds::version_t last_version;    ///< in the range of [1, MAX_size_t]
+        std::vector<pds::version_t> sizes;  ///< keep the size for each version (including 0 for MasterVersion)
 
     public:
+        /**
+         * @brief Construct a new object.
+         * 
+         * @details Also insert two init Versions:
+         *  - Version 0: see @ref MasterVersion.
+         *  - Version 1: will save the init state version. (will always be empty).
+         */
         fpSet();
 
         /**
-         * @brief Insert an object to store in 'version'.
-         *  If the operation succeeds, a new version will be created.
+         * @brief Inserts an object into the set at a specific version.
+         * 
+         * This method adds the given object to the set and ensures that it appears
+         *      in the specified version and subsequent versions.
+         * If the operation succeeds, a new version will be created.
          * 
          * @param obj object to insert.
-         * @attention Since fpSet saves the objects sorted, it will save a copy of 'obj', 
-         *  so the move option is more recommended.
+         * @attention Since fpSet saves a copy of 'obj', the move option is recommended.
          * 
          * @param version The version to insert. 
          *  if 'version'=default_version insert to last version.
          * 
          * @exception 
-         *  - pds::ObjectAlreadyExist()
-         *      if 'version'=default_version and contains('obj', 'curr_version()') != 0 
-         *      or 'version' specify and contains('obj', 'version') == true 
+         *  - pds::ObjectAlreadyExist
+         *      thrown if: 'version'=default_version and contains('obj', 'curr_version()') return true,
+         *      or 'version' specify and contains('obj', 'version') return true.
          * 
-         * - pds::VersionOutOfRange()
-         *      if version is 0 or version is bigger than what returned with 'curr_version()'
+         * - pds::VersionZeroIllegal
+         *      thrown if: version is 0
+         * 
+         * - pds::VersionNotExist
+         *      thrown if: version is bigger than what returned with 'curr_version()'
          * 
          * @return pds::version_t of the new version.
          * 
-         * @note Time complexity: O(log(size()))
+         * @note Time complexity: O(log(N) * log*(N))
+         *  while N is the number of versions, i.e. N is last_version.
          */
         pds::version_t insert(const OBJ& obj, pds::version_t version = default_version);
 
 
         /**
-         * @brief Insert an rvalue object to store in 'version'.
-         *  If the operation succeeds, a new version will be created.
+         * @brief Inserts an object into the set at a specific version.
          * 
-         *  Especially recommended for complex OBJ types, since it can significantly 
-         *  improve performance by avoiding deep copies of data.
+         * This method adds the given object to the set and ensures that it appears
+         *      in the specified version and subsequent versions.
+         * If the operation succeeds, a new version will be created.
+         * 
+         * This is especially recommended for complex OBJ types, 
+         *  as it can significantly improve performance by avoiding deep copies of data.
          * 
          * @param obj object to insert.
          * 
@@ -73,71 +107,174 @@ namespace pds{
          *  if 'version'=default_version insert to last version.
          * 
          * @exception 
-         *  - pds::ObjectAlreadyExist()
-         *      if 'version'=default_version and contains('obj', 'curr_version()') != 0 
-         *      or 'version' specify and contains('obj', 'version') == true 
+         *  - pds::ObjectAlreadyExist
+         *      thrown if: 'version'=default_version and contains('obj', 'curr_version()') return true,
+         *      or 'version' specify and contains('obj', 'version') return true.
          * 
-         * - pds::VersionOutOfRange()
-         *      if version is 0 or version is bigger than what returned with 'curr_version()'
+         * - pds::VersionZeroIllegal
+         *      thrown if: version is 0
+         * 
+         * - pds::VersionNotExist
+         *      thrown if: version is bigger than what returned with 'curr_version()'
          * 
          * @return pds::version_t of the new version.
          * 
-         * @note Time complexity: O(log(size()))
+         * @note Time complexity: O(log(N) * log*(N))
+         *  while N is the number of versions, i.e. N is last_version.
          */
         pds::version_t insert(OBJ&& obj, pds::version_t version = default_version);
 
 
         /**
-         * @brief remove obj from the set with 'version'.
-         *  If the operation succeeds, a new version will be created.
+         * @brief Removes an object from the set at a specific version.
+         * 
+         * This method removes the object from the set, making it unavailable in the specified
+         *      version and all subsequent versions.
+         * If the operation succeeds, a new version will be created.
          * 
          * @param obj object to remove.
          * 
          * @param version the version to remove from. 
-         *  if 'version'=default_version remove from last_version. 
+         *  If 'version'=default_version remove from last_version. 
          * @attention if contains('obj', 'version') == false: exception will thrown.
          * 
          * @exception 
-         * - pds::VersionOutOfRange()
-         *      if version is 0 or version is bigger than what returned with 'curr_version()'
+         * - pds::ObjectNotExist
+         *      thrown if: 'obj' not exists in 'version'
+         * 
+         * - pds::VersionZeroIllegal
+         *      thrown if: version is 0
+         * 
+         * - pds::VersionNotExist
+         *      thrown if: version is bigger than what returned with 'curr_version()'
          * 
          * @return pds::version_t of the new version. 
          * 
-         * @note 
-         * Time complexity: O(log(size()))
+         * @note Time complexity: O(log(N) * log*(N))
+         *  while N is the number of versions, i.e. N is last_version.
          */
         pds::version_t remove(const OBJ& obj, pds::version_t version = default_version);
 
 
+        /**
+         * @brief Removes an object from the set at a specific version.
+         * 
+         * This method removes the object from the set, making it unavailable in the specified
+         *      version and all subsequent versions.
+         * If the operation succeeds, a new version will be created.
+         * 
+         * Recommended for complex OBJ types, for avoiding deep copy of 'obj'.
+         *
+         * @param obj object to remove.
+         * 
+         * @param version the version to remove from. 
+         *  If 'version'=default_version remove from last_version. 
+         * @attention if contains('obj', 'version') == false: exception will thrown.
+         * 
+         * @exception 
+         * - pds::ObjectNotExist
+         *      thrown if: 'obj' not exists in 'version'
+         * 
+         * - pds::VersionZeroIllegal
+         *      thrown if: version is 0
+         * 
+         * - pds::VersionNotExist
+         *      thrown if: version is bigger than what returned with 'curr_version()'
+         * 
+         * @return pds::version_t of the new version.
+         * 
+         * @note Time complexity: O(log(N) * log*(N))
+         *  while N is the number of versions, i.e. N is last_version.
+         */
         pds::version_t remove(OBJ&& obj, pds::version_t version = default_version);
 
 
         /**
-         * @brief check if obj in the set.
+         * @brief Check if an object is in the set in a specific version.
          * 
          * @param obj the object to query for.
-         * @param v if v=MasterVersion search in all versions. else, search for version v.
-         *  
-         * @return true if 'obj' exists in 'version', false otherwise.
          * 
-         * @note 
-         * Time complexity: O(log(size()))
+         * @param version version to check for.
+         *  If the version is not specified then check for MasterVersion which mean: any version.
+         * 
+         * @exception
+         * - pds::VersionNotExist
+         *      thrown if: version is bigger than what returned with 'curr_version()'
+         *
+         * @return true if the object exists in the specified version; otherwise, false.
+         * 
+         * @note Time complexity: O(log(N) * log*(N))
+         *  while N is the number of versions, i.e. N is last_version.
          */
         bool contains(const OBJ& obj, pds::version_t version = MasterVersion);
 
 
+        /**
+         * @brief return a sorted set as std::vector<OBJ>.
+         * 
+         * @param version the version to return for.
+         *  If the version is not specified then return the all objects in all versions as a sorted set.
+         * 
+         * @exception
+         * - pds::VersionNotExist
+         *      thrown if: version is bigger than what returned with 'curr_version()'
+         * 
+         * @return std::vector<OBJ> a sorted set.
+         * 
+         * @note Time complexity: O((K log*(N)) + log(N))
+         *  while K is the number of objects in 'version'
+         *  and N is the number of versions, i.e. N is last_version.
+         */
         std::vector<OBJ> to_vector(const pds::version_t version = MasterVersion);
 
 
-        pds::version_t size(pds::version_t version = MasterVersion) const;
+        /**
+         * @brief size of the set for 'version'.
+         * 
+         * @param version the version to return for.
+         * 
+         * @exception No exceptions.
+         * 
+         * @return pds::version_t a std::size_t. see @ref pds::version_t.
+         *  If the version is not specified: the size of all unique objects in all versions.
+         *  If version not exists: 0
+         */
+        pds::version_t size(pds::version_t version = MasterVersion) const noexcept;
 
 
-        pds::version_t curr_version() const;
+        /**
+         * @brief current version
+         * 
+         * @exception No exceptions.
+         * 
+         * @return pds::version_t 'last_version'.
+         */
+        pds::version_t curr_version() const noexcept;
 
 
+        /**
+         * @brief print the set sorted.
+         * @details The print style is: "Version X: {obj1, obj2, ...}"
+         * 
+         * @param version to print.
+         *  If no version is specify then print the all versions sorted.
+         * 
+         * @exception
+         * - pds::VersionNotExist
+         *      thrown if: version is bigger than what returned with 'curr_version()'
+         * 
+         * @note Time complexity: O((K log*(N)) + log(N))
+         *  while K is the number of objects in 'version'
+         *  and N is the number of versions, i.e. N is last_version.
+         */
         void print(pds::version_t version = MasterVersion);
 
     private:
+        /**
+         * @brief insert implementation. 
+         * For internal use, only to avoid code duplication.
+         * @tparam T Generic type for one of the options: const OBJ&, OBJ&&
+         */
         template <typename T>
         pds::version_t insert_impl(T&& obj, pds::version_t version);
     };
@@ -417,7 +554,7 @@ std::vector<OBJ> pds::fpSet<OBJ>::to_vector(const pds::version_t version) {
 
 
 template <class OBJ>
-pds::version_t pds::fpSet<OBJ>::size(pds::version_t version) const {
+pds::version_t pds::fpSet<OBJ>::size(pds::version_t version) const noexcept {
 
     try{
         return sizes.at(version);
@@ -430,7 +567,7 @@ pds::version_t pds::fpSet<OBJ>::size(pds::version_t version) const {
 
 
 template <class OBJ>
-pds::version_t pds::fpSet<OBJ>::curr_version() const {
+pds::version_t pds::fpSet<OBJ>::curr_version() const noexcept {
 
     return last_version;
 }

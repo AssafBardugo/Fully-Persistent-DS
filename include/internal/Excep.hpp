@@ -1,7 +1,6 @@
 #ifndef PERSISTENT_DATA_STRUCTURE_EXCEPTIONS_HPP
 #define PERSISTENT_DATA_STRUCTURE_EXCEPTIONS_HPP
 
-#include "Utils.hpp"
 
 namespace pds{
 
@@ -76,6 +75,15 @@ namespace pds{
         */
     public:
         NullTracker(std::string&& m) : pdsExcept(std::move(m)){}
+    };
+
+    class OperationNotSupported : public pdsExcept{
+        /*
+            thrown by:
+                - pds::FatNode::back
+        */
+    public:
+        OperationNotSupported(std::string&& m) : pdsExcept(std::move(m)){}
     };
 };
 

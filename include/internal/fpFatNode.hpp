@@ -2,7 +2,6 @@
 #define FULLY_PERSISTENT_FAT_NODE_HPP
 
 #include "Utils.hpp"
-#include "Excep.hpp"
 #include "UnionFind.hpp"
 
 namespace pds{

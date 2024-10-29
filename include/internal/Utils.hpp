@@ -1,3 +1,11 @@
+/**
+ * @file Utils.hpp
+ * @author Assaf Bardugo (https://github.com/AssafBardugo)
+ * 
+ * @brief utilities for pds library
+ * @version 0.1
+ * @date 2024-10-28
+ */
 #ifndef PERSISTENT_DATA_STRUCTURE_UTILITYS_HPP
 #define PERSISTENT_DATA_STRUCTURE_UTILITYS_HPP
 
@@ -23,6 +31,8 @@
 #include <utility>
 #include <vector>
 
+#include "Excep.hpp"
+
 
 #define PDS_THROW_IF_NULL_TRACKER(func_name, vrs)                   \
             do{ if(!ptr->table.at(vrs))                             \
@@ -40,7 +50,16 @@
                     throw pds::VersionNotExist(std::string(func_name)   \
             + ": Version " + std::to_string(vrs) + " is not exist"); } while(0)
 
+
+#define PRINT_GREEN(str)  "\033[32m" << str << "\033[0m"
+
+// TOMOVE
 namespace pds{
+
+    /**
+     * @anchor pds::version_t
+     * @brief A version type for all pds library.
+     */
     using version_t = std::size_t;
 
     /**
@@ -52,7 +71,6 @@ namespace pds{
      *  the all T-nodes together. A new T-node will insert first to MasterVersion and then its 'std::shared_ptr' 
      *  will copied to store it also for its real version.
      * 
-     * @remarks
      * Why its good: The uses of groups all T-nodes (@ref T-node VS fat-node) under one version are:
      * 
      *      A. It helps to insert or remove in BST time-search by determine if a new T-node 

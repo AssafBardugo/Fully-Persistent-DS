@@ -41,7 +41,7 @@ void test_pSet(){
 
         throw pdsExcept("test_pSet: std::Exception: " + string(e.what()));
     }
-    cout << "ALL pSet tests PASSED!!" << endl;
+    cout << "ALL pSet tests " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -90,7 +90,7 @@ void test_pSet_basic(){
     assert(ps.size() == 3);
     assert(ps.to_vector() == objs);
 
-    cout << "pSet::test_pSet_basic PASSED!" << endl;
+    cout << "pSet::test_pSet_basic " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -139,7 +139,7 @@ void test_pSet_insert(){
     vector<int> ps_vec_all = ps.to_vector(); // master version
     assert(ps_vec_all == versions[PDS_RAND_ARR_SIZE - 1]);
 
-    cout << "pSet::test_pSet_insert PASSED!" << endl;
+    cout << "pSet::test_pSet_insert " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -209,7 +209,7 @@ void test_pSet_remove(){
     ps_vec = ps.to_vector(); // take all from master_version
     assert(ps_vec == all_objs);
 
-    cout << "pSet::test_pSet_remove PASSED!" << endl;
+    cout << "pSet::test_pSet_remove " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -249,7 +249,7 @@ void test_pSet_insert_removed_objects(){
 
     assert(ps.size() == PDS_CONTAINS_SIZE);
 
-    cout << "pSet::test_pSet_insert_removed_objects PASSED!" << endl;
+    cout << "pSet::test_pSet_insert_removed_objects " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -309,7 +309,7 @@ void test_pSet_contains(){
     }
     assert(ps.size(last_version) == 0);
 
-    cout << "pSet::test_pSet_contains PASSED!" << endl;
+    cout << "pSet::test_pSet_contains " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -395,14 +395,14 @@ void test_pSet_size_and_to_vector(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    cout << "pSet::test_pSet_size_and_to_vector PASSED!" << endl;
+    cout << "pSet::test_pSet_size_and_to_vector " << PRINT_GREEN("PASSED") << endl;
 }
 
 
 void test_pSet_exceptions(){
 
     // TODO
-    cout << "pSet::test_pSet_exceptions PASSED!" << endl;
+    cout << "pSet::test_pSet_exceptions " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -433,7 +433,7 @@ void test_pSet_edge_case_1(){
         }
     }
 
-    cout << "pSet::test_pSet_edge_case_1 PASSED!" << endl;
+    cout << "pSet::test_pSet_edge_case_1 " << PRINT_GREEN("PASSED") << endl;
 }
 
 
@@ -502,7 +502,7 @@ void test_pSet_edge_case_2(){
         assert(ps.to_vector(v) == versions[v]);
     }
 
-    cout << "pSet::test_pSet_edge_case_2 PASSED!" << endl;
+    cout << "pSet::test_pSet_edge_case_2 " << PRINT_GREEN("PASSED") << endl;
 }
 
 
