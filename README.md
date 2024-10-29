@@ -103,16 +103,6 @@ pds::fpset my_set;
 
 
 
-## Documentation
-
-To generate the documentation using **Doxygen**, ensure Doxygen is installed on your system and then run the following:
-
-```bash
-doxygen Doxyfile
-```
-
-This will generate the documentation in the `docs/` directory.
-
 ## Testing
 
 To build and run the tests:
