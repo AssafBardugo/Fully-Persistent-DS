@@ -3,6 +3,7 @@ build
 include/in-develop
 desktop.ini
 .eraserdiagram
+Doxyfile
 
 *.o
 *.exe
